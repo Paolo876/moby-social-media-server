@@ -16,7 +16,6 @@ const sequelize = require("./config/database");
 
 const PORT = process.env.PORT || 3001;
 
-
 //routes
 app.get("/", (req,res) => res.send("APP IS ONLINE..."))
 app.use("/auth", require("./routes/Users"));
