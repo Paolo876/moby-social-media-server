@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");   //password hash
-const { sign } = require('jsonwebtoken');
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const Users = require("../models/Users");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
+const generateToken = require("../utils/generateToken");
 
 // const db = require("../config/database");
 
@@ -18,33 +18,17 @@ router.post("/login", asyncHandler( async (req, res) => {
     const { username, password } = req.body;
     const user = await Users.findOne({ where: { username }});
 
-    // if(user && (await bcrypt.compare(password, user.password)))
-
     if(user && (await bcrypt.compare(password, user.password))){
         const { id, username } = user;
+        const token = generateToken(id)
+        res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true }) //send the user id on token
         res.json({id, username})
+    } else {
+        res.status(401)
+        throw new Error("Invalid email or password.")
     }
-    // if(!user){
-    //     res.status(401)
-    //     throw new Error("Invalid email or password.")
-    // } else{
-    //     bcrypt.compare(password, user.password).then( async (match) => {       
-    //         if(!match) {
-    //             res.json({error: "The password you entered is incorrect."});
-    //         } else{
-    //             //set isLoggedInto true
-    //             await Users.update({isLoggedIn: true}, { where: { username } });
-    //             const responseData = {
-    //                 username: user.username, 
-    //                 id: user.id, 
-    //                 userInformation: JSON.parse(user.userInformation), 
-    //             }
-    //             const accessToken = sign(responseData, "O7UWf2eGMQNppvpbhd7fHikgUI52P6uwcqMUV4194aeUW88tgxmSVqKFEVzugdm");
-    //             res.json({accessToken, ...responseData });   
-    //         }
-    //     })    
-    // }
 }));
+
 
 /*  @desc       authorize token from cookie
  *  @route      GET /api/users/authorize
@@ -52,16 +36,10 @@ router.post("/login", asyncHandler( async (req, res) => {
  */
 router.get("/authorize", cookieJwtAuth, asyncHandler( async (req,res) => {
     const user = await Users.findByPk(req.user.id)
-    console.log(user)
+    const { id, username } = user;
+
     if(user){
-        res.json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            isAdmin: user.isAdmin,
-            picture: user.picture,
-            googleId: user.googleId,
-        })
+        res.json({id, username})
     } else {
         res.clearCookie("token");
         throw new Error("Not authorized, invalid token.")
@@ -69,9 +47,29 @@ router.get("/authorize", cookieJwtAuth, asyncHandler( async (req,res) => {
 }))
 
 
-// router.get("/", async (req,res) => {
-//     const users = await Users.findAll({ attributes: ['id', 'username']})
-//     res.json(users)
-// })
+/*  @desc       sign up/create a new user
+ *  @route      GET /api/users/authorize
+ *  @access     Public
+ */
+router.post("/signup", asyncHandler( async (req,res) => {
+    const isTaken = await Users.findOne({ where: { username: req.body.username } });
+    if(isTaken){ 
+        res.status(400)
+        throw new Error("Username already exists.") 
+    }
+
+    const user = await Users.create({ ...req.body })
+    if(user){  
+        const { id, username } = user;
+        const token = generateToken(id)
+        res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true }) //send the user id on token
+        res.status(201).json({id, username})
+    } else {
+        res.status(400)
+        throw new Error("Invalid user data.")
+    }
+}))
+
+
 
 module.exports = router;
