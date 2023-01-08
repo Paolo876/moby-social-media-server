@@ -11,7 +11,7 @@ const generateToken = require("../utils/generateToken");
 
 
 /*  @desc       Login user & get token
- *  @route      POST /api/users/login
+ *  @route      POST /api/auth/login
  *  @access     Public
  */
 router.post("/login", asyncHandler( async (req, res) => {
@@ -31,7 +31,7 @@ router.post("/login", asyncHandler( async (req, res) => {
 
 
 /*  @desc       authorize token from cookie
- *  @route      GET /api/users/authorize
+ *  @route      GET /api/auth/authorize
  *  @access     Private
  */
 router.get("/authorize", cookieJwtAuth, asyncHandler( async (req,res) => {
@@ -48,7 +48,7 @@ router.get("/authorize", cookieJwtAuth, asyncHandler( async (req,res) => {
 
 
 /*  @desc       sign up/create a new user
- *  @route      GET /api/users/authorize
+ *  @route      GET /api/auth/signup
  *  @access     Public
  */
 router.post("/signup", asyncHandler( async (req,res) => {
@@ -71,5 +71,16 @@ router.post("/signup", asyncHandler( async (req,res) => {
 }))
 
 
+/*  @desc       logout user, clear saved token on browser
+ *  @route      GET /api/auth/logout
+ *  @access     Public
+ */
+router.get("/logout", asyncHandler( async (req,res) => {
+    res.cookie("token", 'none', { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true , expires: new Date(Date.now() + 2 * 1000),})
+    res
+        .status(201)
+        .send({ message: 'User logged out successfully' })
+
+}))
 
 module.exports = router;
