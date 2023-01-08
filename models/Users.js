@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require("../config/database");
+const bcrypt = require("bcryptjs");
 
 const Users = sequelize.define('Users', {
     username: {
@@ -24,6 +25,32 @@ const Users = sequelize.define('Users', {
         defaultValue: "offline",
         allowNull: false,
     }
+}, {
+    hooks: {
+        beforeCreate: async (user) => {
+            if (user.password) {
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(user.password, salt);
+
+                // const hash = await bcrypt.hashSync(user.password, salt);
+                // user.password = hash;
+                // this.password = await bcrypt.hash(this.password, salt)
+                // const salt = await bcrypt.genSaltSync(10, 'a');
+                // user.password = bcrypt.hashSync(user.password, salt);
+            }
+        },
+        beforeUpdate: async (user) => {
+            if (user.password) {
+                // const salt = await bcrypt.genSaltSync(10, 'a');
+                // user.password = bcrypt.hashSync(user.password, salt);
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(user.password, salt);
+
+                // const hash = bcrypt.hashSync(user.password, salt);
+                // user.password = hash;
+            }
+        }
+    },   
 })
 
 const sync = async () => {

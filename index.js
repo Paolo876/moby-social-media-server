@@ -7,10 +7,17 @@ require("dotenv").config();
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const cookieParser = require("cookie-parser");
 
-
-app.use(cookieParser());
 app.use(express.json());
-app.use(cors());
+app.use(cors(
+    {
+        credentials: true, 
+        origin:  process.env.CLIENT_ORIGINS.split(", "),
+        methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
+        preflightContinue: true,
+        allowedHeaders: ['Content-Type', 'Authorization', "Cookie"],
+}));//to allow api connection from computer to react project
+app.use(cookieParser());
+
 
 const sequelize = require("./config/database"); 
 
@@ -18,7 +25,7 @@ const PORT = process.env.PORT || 3001;
 
 //routes
 app.get("/", (req,res) => res.send("APP IS ONLINE..."))
-app.use("/auth", require("./routes/Users"));
+app.use("/api/auth", require("./routes/Users"));
 
 
 //custom errorhandling (middleware)
