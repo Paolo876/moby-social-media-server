@@ -22,7 +22,7 @@ app.use(cookieParser());
 const sequelize = require("./config/database"); 
 //load db models
 require("./utils/importDBModels")()
-
+require("./models/associations/associations")()
 const PORT = process.env.PORT || 3001;
 
 //routes
