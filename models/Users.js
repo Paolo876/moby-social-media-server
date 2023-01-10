@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const UserStatus = require("./UserStatus");
 const UserData = require("./UserData");
+// const Friends = require("./Friends");
 
 const Users = sequelize.define('Users', {
     username: {
@@ -31,10 +32,15 @@ const Users = sequelize.define('Users', {
     },   
 })
 
-//associations
+/* associations */
 Users.hasMany(UserStatus, { foreignKey: "UserId", onDelete: "cascade"});
 UserStatus.belongsTo(Users);
 Users.hasOne(UserData, { foreignKey: "UserId", onDelete: "cascade"});
 UserData.belongsTo(Users);
+
+//friends assoc
+Users.belongsToMany(Users, { as: "Friends", through: "friends"});
+Users.belongsToMany(Users, { as: 'Requestees', through: 'friendRequests', foreignKey: 'requesterId', onDelete: 'CASCADE'});
+Users.belongsToMany(Users, { as: 'Requesters', through: 'friendRequests', foreignKey: 'requesteeId', onDelete: 'CASCADE'});
 
 module.exports = Users
