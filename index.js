@@ -20,12 +20,15 @@ app.use(cookieParser());
 
 
 const sequelize = require("./config/database"); 
+//db models
+require("./models/UserData")
+require("./models/Users")
 
 const PORT = process.env.PORT || 3001;
 
 //routes
 app.get("/", (req,res) => res.send("APP IS ONLINE..."))
-app.use("/api/auth", require("./routes/Users"));
+// app.use("/api/auth", require("./routes/Users"));
 
 
 //custom errorhandling (middleware)

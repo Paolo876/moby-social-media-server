@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");   //password hash
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const Users = require("../models/Users");
+const UserData = require("../models/UserData");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../utils/generateToken");
@@ -17,7 +18,6 @@ const generateToken = require("../utils/generateToken");
 router.post("/login", asyncHandler( async (req, res) => {
     const { username, password } = req.body;
     const user = await Users.findOne({ where: { username }});
-
     if(user && (await bcrypt.compare(password, user.password))){
         const { id, username } = user;
         const token = generateToken(id)

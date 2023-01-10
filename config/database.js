@@ -6,19 +6,23 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
     logging: false, 
     port: process.env.DB_PORT 
 });
-// const sequelize = new Sequelize('moby-local', 'root', process.env.LOCALHOST_PASSWORD, {
-//     host: "localhost",
-//     dialect: "mysql",
-//     logging: false,
-// });
+
+
 const testDBConnection = async () => {
     try {
         await sequelize.authenticate();
         console.log('Connection has been established successfully.');
+        console.log("DB Models:", sequelize.models)
+
       } catch (error) {
         console.error('Unable to connect to the database:', error);
       }
 }
 testDBConnection();
 
+// const sync = async () => {
+//     await sequelize.sync({ alter: true })
+//     console.log("ASD")
+// }
+// sync()
 module.exports = sequelize;
