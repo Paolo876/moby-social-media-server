@@ -3,8 +3,6 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");   //password hash
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const Users = require("../models/Users");
-const UserData = require("../models/UserData");
-const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../utils/generateToken");
 

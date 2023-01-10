@@ -30,6 +30,7 @@ module.exports = () => {
     //post - like
     Posts.hasMany(Likes, { foreignKey: "PostId", onDelete: "CASCADE"});
     Likes.belongsTo(Posts, {foreignKey: "PostId", onDelete: "CASCADE"});
+    
     //post - user
     Posts.belongsTo(Users);
     Users.hasMany(Posts, { foreignKey: "UserId", onDelete: "CASCADE"});
