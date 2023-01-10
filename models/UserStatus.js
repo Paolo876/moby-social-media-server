@@ -8,10 +8,5 @@ const UserStatus = sequelize.define('UserStatus', {
     },
 })
 
-// const sync = async () => { 
-//     await UserStatus.sync({ alter: true })
-// }
-// sync()
-
 
 module.exports = UserStatus

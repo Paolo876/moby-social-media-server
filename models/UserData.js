@@ -20,10 +20,6 @@ const UserData = sequelize.define('UserData', {
     },
 })
 
-// const sync = async () => { 
-//     await UserData.sync({ alter: true })
-// }
-// sync()
 
 
 module.exports = UserData

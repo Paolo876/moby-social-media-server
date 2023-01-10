@@ -2,6 +2,9 @@ const { DataTypes } = require('sequelize');
 const sequelize = require("../config/database");
 const bcrypt = require("bcryptjs");
 
+const UserStatus = require("./UserStatus");
+const UserData = require("./UserData");
+
 const Users = sequelize.define('Users', {
     username: {
         type: DataTypes.STRING,
@@ -28,9 +31,10 @@ const Users = sequelize.define('Users', {
     },   
 })
 
-// const sync = async () => {
-//     await Users.sync({ alter: true })
-// }
-// sync();
+//associations
+Users.hasMany(UserStatus, { foreignKey: "UserId", onDelete: "cascade"});
+UserStatus.belongsTo(Users);
+Users.hasOne(UserData, { foreignKey: "UserId", onDelete: "cascade"});
+UserData.belongsTo(Users);
 
 module.exports = Users

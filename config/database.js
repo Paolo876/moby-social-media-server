@@ -18,10 +18,13 @@ const testDBConnection = async () => {
         console.error('Unable to connect to the database:', error);
       }
 }
-testDBConnection();
-
 const sync = async () => {
     await sequelize.sync({ alter: true })
 }
-sync()
+
+//init
+testDBConnection();
+sync();
+
+
 module.exports = sequelize;
