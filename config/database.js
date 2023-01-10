@@ -20,9 +20,8 @@ const testDBConnection = async () => {
 }
 testDBConnection();
 
-// const sync = async () => {
-//     await sequelize.sync({ alter: true })
-//     console.log("ASD")
-// }
-// sync()
+const sync = async () => {
+    await sequelize.sync({ alter: true })
+}
+sync()
 module.exports = sequelize;

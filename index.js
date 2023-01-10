@@ -20,9 +20,8 @@ app.use(cookieParser());
 
 
 const sequelize = require("./config/database"); 
-//db models
-require("./models/UserData")
-require("./models/Users")
+//load db models
+require("./utils/importDBModels")()
 
 const PORT = process.env.PORT || 3001;
 
