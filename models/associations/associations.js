@@ -26,30 +26,41 @@ module.exports = () => {
     //comment - user | comment - post
     Comments.belongsTo(Users);
     Comments.belongsTo(Posts);
+    Users.hasMany(Comments, {foreignKey: "UserId", onDelete: "CASCADE"});
 
     //post - comment
     Posts.hasMany(Comments, { foreignKey: "PostId", onDelete: "CASCADE"});
 
     //post - like
     Posts.hasMany(Likes, { foreignKey: "PostId", onDelete: "CASCADE"});
-    Likes.belongsTo(Posts, {foreignKey: "PostId", onDelete: "CASCADE"});
+    Likes.belongsTo(Posts);
     
+    //like - user
+    Users.hasMany(Likes, {foreignKey: "UserId", onDelete: "CASCADE"});
+
     //post - user
     Posts.belongsTo(Users);
     Users.hasMany(Posts, { foreignKey: "UserId", onDelete: "CASCADE"});
     
-    //chatroom - 
+    //chatroom - user
     ChatRoom.belongsToMany(Users, {as: "members", through: "ChatUsers" });
-    ChatRoom.hasMany(ChatMessages, { foreignKey: "ChatRoomId", onDelete: "CASCADE" });
+
+    //chatroom - chatmember
     ChatRoom.hasMany(ChatMembers, { foreignKey: "ChatRoomId",onDelete: "CASCADE" });
+    ChatMembers.belongsTo(ChatRoom, { foreignKey: "ChatRoomId", onDelete: "CASCADE"});
     // ChatRoom.hasMany(ChatMembers, { foreignKey: "UserId",onDelete: "CASCADE" })
 
-    //chatmessage - 
-    ChatMessages.belongsTo(Users, { foreignKey: "UserId",onDelete: "CASCADE" });
-    ChatMessages.belongsTo(ChatRoom, { foreignKey: "ChatRoomId", onDelete: "CASCADE"});
+    //chatmessage - user
+    ChatMessages.belongsTo(Users);
+    Users.hasMany(ChatMessages, { foreignKey: "UserId", onDelete: "CASCADE" })
 
-    //chatmember - 
-    ChatMembers.belongsTo(Users, { foreignKey: "UserId",onDelete: "CASCADE" });
-    ChatMembers.belongsTo(ChatRoom, { foreignKey: "ChatRoomId", onDelete: "CASCADE"});
+    //chatmessage - chatroom
+    ChatMessages.belongsTo(ChatRoom, { foreignKey: "ChatRoomId", onDelete: "CASCADE"});
+    ChatRoom.hasMany(ChatMessages, { foreignKey: "ChatRoomId", onDelete: "CASCADE" });
+
+    //chatmember - user
+    ChatMembers.belongsTo(Users);
+    Users.hasMany(ChatMembers, { foreignKey: "UserId",onDelete: "cascade" });
+
 
 }
