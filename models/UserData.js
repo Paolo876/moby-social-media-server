@@ -12,12 +12,14 @@ const UserData = sequelize.define('UserData', {
     },
     image: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     birthday: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
+}, {
+    freezeTableName: true
 })
 
 

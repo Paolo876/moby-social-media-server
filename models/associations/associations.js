@@ -61,6 +61,4 @@ module.exports = () => {
     //chatmember - user
     ChatMembers.belongsTo(Users);
     Users.hasMany(ChatMembers, { foreignKey: "UserId",onDelete: "cascade" });
-
-
 }
