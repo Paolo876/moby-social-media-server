@@ -4,6 +4,9 @@ const UserStatus = require("../UserStatus");
 const Comments = require("../UserStatus");
 const Posts = require("../Posts");
 const Likes = require("../Likes");
+const ChatRoom = require("../ChatRoom");
+const ChatMessages = require("../ChatMessages");
+const ChatMembers = require("../ChatMembers");
 
 module.exports = () => {
 
@@ -35,4 +38,18 @@ module.exports = () => {
     Posts.belongsTo(Users);
     Users.hasMany(Posts, { foreignKey: "UserId", onDelete: "CASCADE"});
     
+    //chatroom - 
+    ChatRoom.belongsToMany(Users, {as: "members", through: "ChatUsers" });
+    ChatRoom.hasMany(ChatMessages, { foreignKey: "ChatRoomId", onDelete: "CASCADE" });
+    ChatRoom.hasMany(ChatMembers, { foreignKey: "ChatRoomId",onDelete: "CASCADE" });
+    // ChatRoom.hasMany(ChatMembers, { foreignKey: "UserId",onDelete: "CASCADE" })
+
+    //chatmessage - 
+    ChatMessages.belongsTo(Users, { foreignKey: "UserId",onDelete: "CASCADE" });
+    ChatMessages.belongsTo(ChatRoom, { foreignKey: "ChatRoomId", onDelete: "CASCADE"});
+
+    //chatmember - 
+    ChatMembers.belongsTo(Users, { foreignKey: "UserId",onDelete: "CASCADE" });
+    ChatMembers.belongsTo(ChatRoom, { foreignKey: "ChatRoomId", onDelete: "CASCADE"});
+
 }

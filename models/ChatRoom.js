@@ -1,2 +1,2 @@
 const sequelize = require("../config/database");
-module.exports = sequelize.define("Likes");
+module.exports = sequelize.define("ChatRoom");
