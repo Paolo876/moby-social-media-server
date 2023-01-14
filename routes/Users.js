@@ -75,8 +75,15 @@ router.post("/signup", asyncHandler( async (req,res) => {
  *  @access     Private
  */
 router.post("/profile-setup", cookieJwtAuth, asyncHandler( async (req,res) => {
-    console.log("ASD", req.body)
-    res.json(req.body)
+    const UserId = req.user.id;
+    const { firstName, lastName, birthday, image } = req.body;
+    const userData = await UserData.create({ UserId, firstName, lastName, birthday, image})
+    if(userData){
+        res.status(200).json(userData)
+    } else {
+        res.status(400)
+        throw new Error("Failed to fetch data from server.")
+    }
 }))
 
 
