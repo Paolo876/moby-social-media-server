@@ -8,14 +8,17 @@ const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const cookieParser = require("cookie-parser");
 
 app.use(express.json());
+app.enable("trust proxy")
 app.use(cors(
     {
         credentials: true, 
         origin:  process.env.CLIENT_ORIGINS.split(", "),
         methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
         preflightContinue: true,
-        allowedHeaders: ['Content-Type', 'Authorization', "Cookie"],
+        allowedHeaders: ['Content-Type', 'Authorization', "Cookie", "referer", "range", "accept-encoding", "x-requested-with"],
 }));//to allow api connection from computer to react project
+app.use(express.json({ limit: "20mb" }));    // allow json data in req.body
+
 app.use(cookieParser());
 
 
@@ -28,6 +31,7 @@ const PORT = process.env.PORT || 3001;
 //routes
 app.get("/", (req,res) => res.send("APP IS ONLINE..."))
 app.use("/api/auth", require("./routes/Users"));
+app.use("/api/imagekit", require("./routes/Imagekit"));
 
 
 //custom errorhandling (middleware)

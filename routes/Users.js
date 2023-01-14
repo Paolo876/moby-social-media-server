@@ -16,7 +16,7 @@ const generateToken = require("../utils/generateToken");
  */
 router.post("/login", asyncHandler( async (req, res) => {
     const { username, password } = req.body;
-    const user = await Users.findOne({ where: { username },include: [{model: UserData}]});
+    const user = await Users.findOne({ where: { username }, include: [{model: UserData}]});
     if(user && (await bcrypt.compare(password, user.password))){
         const { id, username, UserDatum } = user;
         const token = generateToken(id)
@@ -34,11 +34,11 @@ router.post("/login", asyncHandler( async (req, res) => {
  *  @access     Private
  */
 router.get("/authorize", cookieJwtAuth, asyncHandler( async (req,res) => {
-    const user = await Users.findByPk(req.user.id)
-    const { id, username } = user;
+    const user = await Users.findByPk(req.user.id, { include: [{model: UserData}] })
+    const { id, username, UserDatum } = user;
 
     if(user){
-        res.json({id, username})
+        res.json({id, username, UserData: UserDatum})
     } else {
         res.clearCookie("token");
         throw new Error("Not authorized, invalid token.")
@@ -47,7 +47,7 @@ router.get("/authorize", cookieJwtAuth, asyncHandler( async (req,res) => {
 
 
 /*  @desc       sign up/create a new user
- *  @route      GET /api/auth/signup
+ *  @route      POST /api/auth/signup
  *  @access     Public
  */
 router.post("/signup", asyncHandler( async (req,res) => {
@@ -62,11 +62,21 @@ router.post("/signup", asyncHandler( async (req,res) => {
         const { id, username } = user;
         const token = generateToken(id)
         res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true }) //send the user id on token
-        res.status(201).json({id, username})
+        res.status(201).json({id, username, UserData: null})
     } else {
         res.status(400)
         throw new Error("Invalid user data.")
     }
+}))
+
+
+/*  @desc       setup the profile of a new user.
+ *  @route      POST /api/auth/signup
+ *  @access     Private
+ */
+router.post("/profile-setup", cookieJwtAuth, asyncHandler( async (req,res) => {
+    console.log("ASD", req.body)
+    res.json(req.body)
 }))
 
 
