@@ -8,7 +8,7 @@ const asyncHandler = require("express-async-handler");
 
 
 /*  @desc       Get posts --paginated to 15 posts per request
- *  @route      GET /api/auth/
+ *  @route      GET /api/posts/
  *  @access     Private
  */
 router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
@@ -26,9 +26,23 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
             }]
         }]
     })
-
     if(posts){
         res.json(posts)
+    } else {
+        res.status(401)
+        throw new Error("Failed to fetch posts.")
+    }
+}));
+
+
+/*  @desc       Create post
+ *  @route      POST /api/posts/create
+ *  @access     Private
+ */
+router.post("/create", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const post = await Posts.create({ ...req.body, UserId: req.user.id})
+    if(post){
+        res.json(post)
     } else {
         res.status(401)
         throw new Error("Failed to fetch posts.")
