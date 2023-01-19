@@ -1,27 +1,39 @@
 const express = require("express");
 const router = express.Router();
 const Posts = require("../models/Posts");
+const Users = require("../models/Users");
+const UserData = require("../models/UserData")
+const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
+const asyncHandler = require("express-async-handler");
 
 
-
-/*  @desc       Get posts
- *  @route      POST /api/auth/login
- *  @access     Public
+/*  @desc       Get posts --paginated to 15 posts per request
+ *  @route      GET /api/auth/
+ *  @access     Private
  */
-router.get("/", asyncHandler( async (req, res) => {
+router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
     const pageSize = 15; // <--limit data fetched (pagination)
+    const page = Number(req.query.pageNumber) || 1;
+    const posts = await Posts.findAll({ 
+        offset: pageSize * ( page - 1), limit: 15,
+        order: [ [ 'createdAt', 'DESC' ]], 
+        include: [{
+            model: Users, 
+            attributes: ['username'], 
+            include: [{
+                model: UserData,
+                attributes: ['firstName', 'lastName', 'image']
+            }]
+        }]
+    })
 
-
-    const { username, password } = req.body;
-    const user = await Users.findOne({ where: { username }, include: [{model: UserData}]});
-    if(user && (await bcrypt.compare(password, user.password))){
-        const { id, username, UserDatum } = user;
-        const token = generateToken(id)
-        res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true }) //send the user id on token
-        res.json({id, username, UserData: UserDatum})
+    if(posts){
+        res.json(posts)
     } else {
         res.status(401)
-        throw new Error("Invalid email or password.")
+        throw new Error("Failed to fetch posts.")
     }
 }));
+
+
 module.exports = router;
