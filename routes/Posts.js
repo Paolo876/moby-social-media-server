@@ -45,7 +45,23 @@ router.post("/create", cookieJwtAuth, asyncHandler( async (req, res) => {
         res.json(post)
     } else {
         res.status(401)
-        throw new Error("Failed to fetch posts.")
+        throw new Error("Failed to create post.")
+    }
+}));
+
+
+/*  @desc       Delete post
+ *  @route      DELETE /api/posts/:id
+ *  @access     Private
+ */
+router.delete("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const post = await Posts.findByPk(req.params.id)
+    if(post && post.UserId === req.user.id){
+        await post.destroy();
+        res.json(req.params.id)
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
     }
 }));
 
