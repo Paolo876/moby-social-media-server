@@ -3,6 +3,8 @@ const router = express.Router();
 const Posts = require("../models/Posts");
 const Users = require("../models/Users");
 const UserData = require("../models/UserData")
+const Likes = require("../models/Likes");
+
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
 
@@ -19,11 +21,15 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         order: [ [ 'createdAt', 'DESC' ]], 
         include: [{
             model: Users, 
-            attributes: ['username'], 
+            attributes: ['username', 'id'], 
             include: [{
                 model: UserData,
                 attributes: ['firstName', 'lastName', 'image']
             }]
+        }, {
+            model: Likes,
+            attributes: ['UserId'], 
+
         }]
     })
     if(posts){
