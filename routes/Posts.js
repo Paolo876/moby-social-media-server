@@ -107,7 +107,7 @@ router.delete("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
  *  @route      POST /api/posts/like/:id
  *  @access     Private
  */
-router.put("/like/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+router.post("/like/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const isLiked = await Likes.findOne({where: {PostId: req.params.id, UserId: req.user.id}});
 
     if(isLiked){
