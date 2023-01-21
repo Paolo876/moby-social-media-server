@@ -69,13 +69,31 @@ router.post("/create", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
+/*  @desc       Update/Edit post
+ *  @route      PUT /api/posts/:id
+ *  @access     Private
+ */
+router.put("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const data = req.body
+    let post = await Posts.findOne({where: { Id: req.params.id, UserId: req.user.id }})
+    if(post){
+        await post.update({...data})
+        await post.save();
+        res.json(post)
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
+    }
+}));
+
+
 /*  @desc       Delete post
  *  @route      DELETE /api/posts/:id
  *  @access     Private
  */
 router.delete("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
-    const post = await Posts.findByPk(req.params.id)
-    if(post && post.UserId === req.user.id){
+    const post = await Posts.findOne({where: { Id: req.params.id, UserId: req.user.id }})
+    if(post){
         await post.destroy();
         res.json(req.params.id)
     } else {
