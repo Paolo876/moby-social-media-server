@@ -46,7 +46,20 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
  *  @access     Private
  */
 router.post("/create", cookieJwtAuth, asyncHandler( async (req, res) => {
-    const post = await Posts.create({ ...req.body, UserId: req.user.id})
+    const { id } = await Posts.create({ ...req.body, UserId: req.user.id})
+    const post = await Posts.findByPk( id, { 
+        include: [{
+            model: Users, 
+            attributes: ['username', 'id'], 
+            include: [{
+                model: UserData,
+                attributes: ['firstName', 'lastName', 'image']
+            }]
+        }, {
+            model: Likes,
+            attributes: ['UserId'], 
+        }]
+    })    
     if(post){
         res.json(post)
     } else {
