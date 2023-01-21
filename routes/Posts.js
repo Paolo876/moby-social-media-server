@@ -104,18 +104,18 @@ router.delete("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
 
 
 /*  @desc       Like/Unlike Post
- *  @route      POST /api/posts/like/:id
+ *  @route      GET /api/posts/like/:id
  *  @access     Private
  */
-router.post("/like/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+router.get("/like/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const isLiked = await Likes.findOne({where: {PostId: req.params.id, UserId: req.user.id}});
 
     if(isLiked){
         await isLiked.destroy();
-        res.json({isLiked: false, id: req.params.id})
+        res.json({isLiked: false, id: req.params.id, UserId: req.user.id})
     } else {
         await Likes.create({PostId: req.params.id, UserId: req.user.id})
-        res.json({isLiked: true, id: req.params.id})
+        res.json({isLiked: true, id: req.params.id, UserId: req.user.id})
     }
 }));
 
