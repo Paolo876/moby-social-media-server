@@ -1,7 +1,7 @@
 const Users = require("../Users");
 const UserData = require("../UserData");
 const UserStatus = require("../UserStatus");
-const Comments = require("../UserStatus");
+const Comments = require("../Comments");
 const Posts = require("../Posts");
 const Likes = require("../Likes");
 const ChatRoom = require("../ChatRoom");
@@ -25,11 +25,11 @@ module.exports = () => {
 
     //comment - user | comment - post
     Comments.belongsTo(Users);
-    Comments.belongsTo(Posts);
     Users.hasMany(Comments, {foreignKey: "UserId", onDelete: "CASCADE"});
 
     //post - comment
     Posts.hasMany(Comments, { foreignKey: "PostId", onDelete: "CASCADE"});
+    Comments.belongsTo(Posts);
 
     //post - like
     Posts.hasMany(Likes, { foreignKey: "PostId", onDelete: "CASCADE"});
