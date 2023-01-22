@@ -4,12 +4,13 @@ const Posts = require("../models/Posts");
 const Users = require("../models/Users");
 const UserData = require("../models/UserData")
 const Likes = require("../models/Likes");
+const Comments = require("../models/Comments");
 
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
 
 
-/*  @desc       Get posts --paginated to 15 posts per request
+/*  @desc       Get all posts --paginated to 15 posts per request, most recent first.
  *  @route      GET /api/posts/
  *  @access     Private
  */
@@ -29,14 +30,66 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         }, {
             model: Likes,
             attributes: ['UserId'], 
-
-        }]
+        }, {
+            model: Comments,
+            attributes: ['UserId'], 
+        },
+    ]
     })
     if(posts){
         res.json(posts)
     } else {
         res.status(401)
         throw new Error("Failed to fetch posts.")
+    }
+}));
+
+
+/*  @desc       Get post by id
+ *  @route      GET /api/posts/:id
+ *  @access     Private
+ */
+router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const post = await Posts.findOne({ 
+        where: { id: req.params.id },
+        order: [ [ 'createdAt', 'DESC' ]], 
+        include: [{
+            model: Users, 
+            attributes: ['username', 'id'], 
+            include: [{
+                model: UserData,
+                attributes: ['firstName', 'lastName', 'image']
+            }]
+        }, {
+            model: Likes,
+            attributes: ['UserId'], 
+            include: [{
+                model: Users, 
+                attributes: ['username', 'id'], 
+                include: [{
+                    model: UserData,
+                    attributes: ['firstName', 'lastName', 'image']
+                }]
+            }]
+        }, {
+            model: Comments,
+            attributes: ['UserId', 'comment', 'createdAt', 'updatedAt'], 
+            include: [{
+                model: Users, 
+                attributes: ['username', 'id'], 
+                include: [{
+                    model: UserData,
+                    attributes: ['firstName', 'lastName', 'image']
+                }]
+            }]
+        },
+    ]
+    })
+    if(post){
+        res.json(post)
+    } else {
+        res.status(401)
+        throw new Error("Failed to fetch post data.")
     }
 }));
 
