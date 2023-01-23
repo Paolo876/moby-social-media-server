@@ -73,7 +73,7 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
             }]
         }, {
             model: Comments,
-            attributes: ['UserId', 'comment', 'createdAt', 'updatedAt'], 
+            attributes: { exclude: ["PostId"]}, 
             include: [{
                 model: Users, 
                 attributes: ['username', 'id'], 
@@ -89,7 +89,7 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
         res.json(post)
     } else {
         res.status(401)
-        throw new Error("Failed to fetch post data.")
+        throw new Error("No data found.")
     }
 }));
 
@@ -111,7 +111,10 @@ router.post("/create", cookieJwtAuth, asyncHandler( async (req, res) => {
         }, {
             model: Likes,
             attributes: ['UserId'], 
-        }]
+        }, {
+            model: Comments,
+            attributes: ['UserId', 'comment', 'createdAt', 'updatedAt'], 
+        },]
     })    
     if(post){
         res.json(post)
