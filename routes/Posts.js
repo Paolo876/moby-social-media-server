@@ -132,7 +132,7 @@ router.post("/create", cookieJwtAuth, asyncHandler( async (req, res) => {
  */
 router.put("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const data = req.body
-    let post = await Posts.findOne({where: { Id: req.params.id, UserId: req.user.id }})
+    let post = await Posts.findOne({where: { id: req.params.id, UserId: req.user.id }})
     if(post){
         await post.update({...data})
         await post.save();
