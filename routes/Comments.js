@@ -38,4 +38,20 @@ router.put("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     }
 }));
 
+
+/*  @desc       delete a comment
+ *  @route      DELETE /api/comments/:id
+ *  @access     Private
+ */
+router.delete("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    let comment = await Comments.findOne({where: { id: req.params.id, UserId: req.user.id }})
+    if(comment){
+        await comment.destroy();
+        res.json(req.params.id)
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
+    }
+}));
+
 module.exports = router;
