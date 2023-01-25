@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Comments = require("../models/Comments");
-
+const Users = require("../models/Users");
+const UserData = require("../models/UserData");
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
 
@@ -11,7 +12,17 @@ const asyncHandler = require("express-async-handler");
  *  @access     Private
  */
 router.post("/new-comment", cookieJwtAuth, asyncHandler( async (req, res) => {
-    const comment = await Comments.create({ ...req.body, UserId: req.user.id})
+    const { id } = await Comments.create({ ...req.body, UserId: req.user.id})
+    const comment = await Comments.findByPk(id,{
+        include: [{
+            model: Users, 
+            attributes: ['username', 'id'], 
+            include: [{
+                model: UserData,
+                attributes: ['firstName', 'lastName', 'image']
+            }]             
+        }]
+    })
     if(comment){
         res.json(comment)
     } else {
