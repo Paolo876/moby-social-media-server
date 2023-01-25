@@ -11,8 +11,13 @@ const asyncHandler = require("express-async-handler");
  *  @access     Private
  */
 router.post("/new-comment", cookieJwtAuth, asyncHandler( async (req, res) => {
-    // const { id } = await Comments.create({ ...req.body, UserId: req.user.id})
-
+    const comment = await Comments.create({ ...req.body, UserId: req.user.id})
+    if(comment){
+        res.json(comment)
+    } else {
+        res.status(401)
+        throw new Error("Failed to post comment.")
+    }
 }));
 
 module.exports = router;

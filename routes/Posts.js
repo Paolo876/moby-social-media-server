@@ -32,7 +32,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
             attributes: ['UserId'], 
         }, {
             model: Comments,
-            attributes: ['UserId'], 
+            attributes: ['UserId', 'id'], 
         },
     ]
     })
@@ -52,7 +52,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
 router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const post = await Posts.findOne({ 
         where: { id: req.params.id },
-        order: [ [ 'createdAt', 'DESC' ]], 
+        order: [ [ Comments, 'createdAt', 'DESC' ]], 
         include: [{
             model: Users, 
             attributes: ['username', 'id'], 
@@ -73,6 +73,7 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
             }]
         }, {
             model: Comments,
+            order: [ [ 'createdAt', 'DESC' ]],
             attributes: { exclude: ["PostId"]}, 
             include: [{
                 model: Users, 
