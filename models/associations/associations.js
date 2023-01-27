@@ -1,12 +1,14 @@
 const Users = require("../Users");
 const UserData = require("../UserData");
 const UserStatus = require("../UserStatus");
+const UserBio = require("../UserBio");
 const Comments = require("../Comments");
 const Posts = require("../Posts");
 const Likes = require("../Likes");
 const ChatRoom = require("../ChatRoom");
 const ChatMessages = require("../ChatMessages");
 const ChatMembers = require("../ChatMembers");
+const Bookmarks = require("../Bookmarks");
 
 module.exports = () => {
 
@@ -17,6 +19,10 @@ module.exports = () => {
     //user - userdata
     Users.hasOne(UserData, { foreignKey: "UserId", onDelete: "CASCADE"});
     UserData.belongsTo(Users);
+
+    //user - userbio
+    Users.hasOne(UserBio, { foreignKey: "UserId", onDelete: "CASCADE"});
+    UserBio.belongsTo(Users);
 
     //user friend
     Users.belongsToMany(Users, { as: "Friends", through: "friends"});
@@ -62,4 +68,9 @@ module.exports = () => {
     //chatmember - user
     ChatMembers.belongsTo(Users);
     Users.hasMany(ChatMembers, { foreignKey: "UserId",onDelete: "cascade" });
+
+    //bookmarks - user
+    Users.hasMany(Bookmarks, {foreignKey: "UserId", onDelete: "CASCADE"});
+    Bookmarks.belongsTo(Users);
+
 }

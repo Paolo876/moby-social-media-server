@@ -62,7 +62,7 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
             }]
         }, {
             model: Likes,
-            attributes: ['UserId'], 
+            attributes: ['UserId', 'id'], 
             include: [{
                 model: Users, 
                 attributes: ['username', 'id'], 
