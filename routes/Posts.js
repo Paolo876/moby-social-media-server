@@ -182,4 +182,21 @@ router.get("/like/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
+/*  @desc       bookmark Post
+ *  @route      GET /api/posts/bookmark/:id
+ *  @access     Private
+ */
+router.get("/bookmark/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const isBookmarked = await Bookmarks.findOne({where: {PostId: req.params.id, UserId: req.user.id}});
+
+    if(isBookmarked){
+        await isBookmarked.destroy();
+        res.json({isBookmarked: false, PostId: req.params.id, UserId: req.user.id})
+    } else {
+        await Bookmarks.create({PostId: req.params.id, UserId: req.user.id})
+        res.json({isBookmarked: true, PostId: req.params.id, UserId: req.user.id})
+    }
+}));
+
+
 module.exports = router;
