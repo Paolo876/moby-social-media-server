@@ -73,4 +73,8 @@ module.exports = () => {
     Users.hasMany(Bookmarks, {foreignKey: "UserId", onDelete: "CASCADE"});
     Bookmarks.belongsTo(Users);
 
+    //bookmarks - post
+    Posts.hasMany(Bookmarks, {foreignKey: "PostId", onDelete: "CASCADE"});
+    Bookmarks.belongsTo(Posts);
+
 }

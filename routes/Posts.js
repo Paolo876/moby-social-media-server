@@ -3,6 +3,7 @@ const router = express.Router();
 const Posts = require("../models/Posts");
 const Users = require("../models/Users");
 const UserData = require("../models/UserData")
+const Bookmarks = require("../models/Bookmarks")
 const Likes = require("../models/Likes");
 const Comments = require("../models/Comments");
 
@@ -36,8 +37,12 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         },
     ]
     })
+    const bookmarks = await Bookmarks.findAll({
+        where: { UserId: req.user.id},
+        attributes: ["PostId"]
+    })
     if(posts){
-        res.json(posts)
+        res.json({posts, bookmarks})
     } else {
         res.status(401)
         throw new Error("Failed to fetch posts.")
