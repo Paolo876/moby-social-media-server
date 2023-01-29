@@ -4,10 +4,10 @@ const sequelize = require("../config/database");
 module.exports = sequelize.define("UserBio", {
     body: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     links: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
     }
 })

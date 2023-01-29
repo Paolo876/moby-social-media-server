@@ -55,6 +55,7 @@ router.get("/profile/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     });
     
     if(user){
+        console.log(user)
         res.json(user)
     } else {
         res.status(401)
