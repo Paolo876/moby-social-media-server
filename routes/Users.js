@@ -6,6 +6,9 @@ const Users = require("../models/Users");
 const UserData = require("../models/UserData");
 const UserBio = require("../models/UserBio");
 const Posts = require("../models/Posts");
+const Likes = require("../models/Likes");
+const Comments = require("../models/Comments");
+const Bookmarks = require("../models/Bookmarks");
 
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../utils/generateToken");
@@ -49,13 +52,18 @@ router.get("/profile/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
                 attributes: ['body', 'links']
             },{
                 model: Posts,
-                attributes: ['id', 'title', 'postText', 'image', 'isPublic', 'createdAt']
+                attributes: ['id', 'title', 'postText', 'image', 'isPublic', 'createdAt'],
+                include: [{
+                    model: Likes,
+                    attributes: ['UserId'], 
+                }, {
+                    model: Comments,
+                    attributes: ['UserId', 'id'], 
+                }]
             },
         ]
     });
-    
     if(user){
-        console.log(user)
         res.json(user)
     } else {
         res.status(401)
@@ -132,6 +140,22 @@ router.get("/logout", asyncHandler( async (req,res) => {
         .status(201)
         .send({ message: 'User logged out successfully' })
 
+}))
+
+
+/*  @desc       Get User's bookmarked posts
+ *  @route      GET /api/auth/bookmarks
+ *  @access     Private
+ */
+router.get("/bookmarks", cookieJwtAuth, asyncHandler( async (req,res) => {
+    const bookmarks = await Bookmarks.findAll({ where: { UserId: req.user.id }, attributes: ["PostId"]});
+
+    if(bookmarks){
+        res.json(bookmarks)
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
+    }
 }))
 
 module.exports = router;
