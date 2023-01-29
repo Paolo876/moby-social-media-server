@@ -3,11 +3,12 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");   //password hash
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const Users = require("../models/Users");
-const UserData = require("../models/UserData")
+const UserData = require("../models/UserData");
+const UserBio = require("../models/UserBio");
+const Posts = require("../models/Posts");
+
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../utils/generateToken");
-
-// const db = require("../config/database");
 
 
 /*  @desc       Login user & get token
@@ -25,6 +26,39 @@ router.post("/login", asyncHandler( async (req, res) => {
     } else {
         res.status(401)
         throw new Error("Invalid email or password.")
+    }
+}));
+
+
+/*  @desc       Get User profile data
+ *  @route      GET /api/auth/profile/:id
+ *  @access     Public
+ */
+router.get("/profile/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const id = req.params.id
+    const user = await Users.findOne({ 
+        where: { id }, 
+        attributes: ['username', 'id', 'createdAt'], 
+        order: [ [ Posts, 'createdAt', 'DESC' ]], 
+        include: [
+            {
+                model: UserData,
+                attributes: ['firstName', 'lastName', 'image']
+            },{
+                model: UserBio,
+                attributes: ['body', 'links']
+            },{
+                model: Posts,
+                attributes: ['id', 'title', 'postText', 'image', 'isPublic', 'createdAt']
+            },
+        ]
+    });
+    
+    if(user){
+        res.json(user)
+    } else {
+        res.status(401)
+        throw new Error("No data found.")
     }
 }));
 

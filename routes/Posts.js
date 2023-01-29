@@ -91,8 +91,11 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
         },
     ]
     })
+
+    const isBookmarked = await Bookmarks.findOne({where: { PostId: req.params.id, UserId: req.user.id }})
+    
     if(post){
-        res.json(post)
+        res.json({post, isBookmarked: isBookmarked ? true : false})
     } else {
         res.status(401)
         throw new Error("No data found.")
