@@ -102,30 +102,54 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
 router.get("/search/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const UserId = req.user.id;
     const FriendId = req.params.id;
-    const isChatRoomAvailable = await ChatMembers.findOne({
+    const isChatRoomExisting = await ChatMembers.findOne({
         where : { UserId: [ UserId, FriendId ] }, //where UserId is either UserId/FriendId
         group: "ChatRoomId", 
         having: literal(`count(*) = 2`),
         attributes: ["ChatRoomId"]
     });
 
-    if(isChatRoomAvailable){
-        res.json(isChatRoomAvailable)
+    if(isChatRoomExisting){
+        res.json(isChatRoomExisting)
     } else {
         res.json({ChatRoomId: null})
     }
-
 }));
 
 
-// /*  @desc       Send a message (creates a new chatRoom if no chatRoom exists between sender and receipient)
-//  *  @route      POST /api/chat/
-//  *  @access     Private
-//  */
-// router.post("/", cookieJwtAuth, asyncHandler( async (req, res) => {
-//     const UserId = req.user.id;
+/*  @desc       Send a message to new user (creates a new chatRoom if no chatRoom exists between sender and receipient)
+ *  @route      POST /api/chat/
+ *  @access     Private
+ */
+router.post("/new", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
+    const { message, media, receipientId } = req.body;
 
-// }));
+    //check if chatRoom already exists
+    const isChatRoomExisting = await ChatMembers.findOne({
+        where : { UserId: [ UserId, receipientId ] }, //where UserId is either UserId/FriendId
+        group: "ChatRoomId", 
+        having: literal(`count(*) = 2`),
+        attributes: ["ChatRoomId"]
+    });
+
+    if(!isChatRoomExisting){
+        //create chatroom
+        const { id: ChatRoomId } = await ChatRoom.create();
+
+        //create chatMembers for user & receipient
+        await ChatMembers.create({ChatRoomId, UserId, isLastMessageRead: true});
+        await ChatMembers.create({ChatRoomId, UserId: receipientId, isLastMessageRead: false});
+        
+        //create chatmessage
+        await ChatMessages.create({message, media, ChatRoomId, UserId})
+
+        res.json({isExisting: false, ChatRoomId })
+    } else {
+        res.json({isExisting: true, ChatRoomId: isChatRoomExisting.ChatRoomId})
+    }
+
+}));
 
 module.exports = router;
 
