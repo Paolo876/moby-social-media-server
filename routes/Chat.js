@@ -118,7 +118,7 @@ router.get("/search/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
 
 
 /*  @desc       Send a [new]message to new user (creates a new chatRoom if no chatRoom exists between sender and receipient)
- *  @route      POST /api/chat/
+ *  @route      POST /api/chat/new
  *  @access     Private
  */
 router.post("/new", cookieJwtAuth, asyncHandler( async (req, res) => {
@@ -152,7 +152,7 @@ router.post("/new", cookieJwtAuth, asyncHandler( async (req, res) => {
 
 
 /*  @desc       Send a message [to existing chatRoom]
- *  @route      POST /api/chat/
+ *  @route      POST /api/chat/send-message
  *  @access     Private
  */
 router.post("/send-message", cookieJwtAuth, asyncHandler( async (req, res) => {

@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");   //password hash
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
+const asyncHandler = require("express-async-handler");
+const generateToken = require("../utils/generateToken");
+const sequelize = require('sequelize');
+
 const Users = require("../models/Users");
 const UserData = require("../models/UserData");
 const UserBio = require("../models/UserBio");
@@ -9,9 +13,6 @@ const Posts = require("../models/Posts");
 const Likes = require("../models/Likes");
 const Comments = require("../models/Comments");
 const Bookmarks = require("../models/Bookmarks");
-
-const asyncHandler = require("express-async-handler");
-const generateToken = require("../utils/generateToken");
 
 
 /*  @desc       Login user & get token
@@ -155,6 +156,37 @@ router.get("/bookmarks", cookieJwtAuth, asyncHandler( async (req,res) => {
     } else {
         res.status(401)
         throw new Error("Not authorized.")
+    }
+}))
+
+
+/*  @desc       Search users [implemented on chat search]
+ *  @route      GET /api/auth/search/:q
+ *  @access     Private
+ */
+router.get("/search/:q", cookieJwtAuth, asyncHandler( async (req,res) => {
+    const query = req.params.q.toLowerCase();
+    
+    const users = await Users.findAll({
+        attributes: ['username', 'id'], 
+        include: {
+            model: UserData,
+            attributes: ['firstName', 'lastName', 'image']
+        },
+        where: {
+            [sequelize.Op.or]: [
+                { 'username': { [sequelize.Op.like]: '%' + query + '%' } },
+                { '$UserDatum.firstName$': { [sequelize.Op.like]: '%' + query + '%' } },
+                { '$UserDatum.lastName$': { [sequelize.Op.like]: '%' + query + '%' } },
+            ]
+        }
+    })
+    
+    if(users){
+        res.json(users)
+    } else {
+        res.status(401)
+        throw new Error("Failed to fetch users.")
     }
 }))
 
