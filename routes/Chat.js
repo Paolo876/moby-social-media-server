@@ -117,7 +117,7 @@ router.get("/search/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
-/*  @desc       Send a message to new user (creates a new chatRoom if no chatRoom exists between sender and receipient)
+/*  @desc       Send a [new]message to new user (creates a new chatRoom if no chatRoom exists between sender and receipient)
  *  @route      POST /api/chat/
  *  @access     Private
  */
@@ -148,8 +148,33 @@ router.post("/new", cookieJwtAuth, asyncHandler( async (req, res) => {
     } else {
         res.json({isExisting: true, ChatRoomId: isChatRoomExisting.ChatRoomId})
     }
-
 }));
+
+
+/*  @desc       Send a message [to existing chatRoom]
+ *  @route      POST /api/chat/
+ *  @access     Private
+ */
+router.post("/send-message", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
+    const ChatRoomId = req.body.ChatRoomId;
+
+    //check if chatRoom already exists & User is a member
+    const isChatRoomExisting = await ChatMembers.findOne({where : { UserId, ChatRoomId }});
+
+    if(isChatRoomExisting){
+        const chatMessage = await ChatMessages.create({...req.body, UserId})
+
+        //update isLastMessageRead property on ChatUsers except user/sender
+        await ChatMembers.update({isLastMessageRead: false}, { where: { ChatRoomId, UserId: { [Op.not]: UserId }}})
+
+        res.json(chatMessage)
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
+    }
+}));
+
 
 module.exports = router;
 
