@@ -174,6 +174,7 @@ router.get("/search/:q", cookieJwtAuth, asyncHandler( async (req,res) => {
             attributes: ['firstName', 'lastName', 'image']
         },
         where: {
+            id: { [sequelize.Op.not]: req.user.id },    //don't include self on search
             [sequelize.Op.or]: [
                 { 'username': { [sequelize.Op.like]: '%' + query + '%' } },
                 { '$UserDatum.firstName$': { [sequelize.Op.like]: '%' + query + '%' } },
@@ -181,7 +182,7 @@ router.get("/search/:q", cookieJwtAuth, asyncHandler( async (req,res) => {
             ]
         }
     })
-    
+
     if(users){
         res.json(users)
     } else {
