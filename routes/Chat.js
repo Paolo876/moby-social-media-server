@@ -22,7 +22,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         include: [{
             model: ChatRoom,
             attributes: ["id"],
-            include: [{
+            include: {
                 model: ChatMessages,
                 limit: 1,
                 order: [['createdAt', 'DESC']],
@@ -34,12 +34,16 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
                         attributes: ['firstName', 'lastName', 'image']
                     }],
                 }]
-            }]
-        }]
+            }
+        }],
     })
 
     if(chatRooms){
-        res.json(chatRooms)
+        const result = chatRooms.sort((a, b) => {
+            if(a.ChatRoom.ChatMessages[0] && b.ChatRoom.ChatMessages[0]) return new Date(b.ChatRoom.ChatMessages[0].createdAt) - new Date(a.ChatRoom.ChatMessages[0].createdAt);
+        })
+
+        res.json(result)
     } else {
         res.status(401)
         throw new Error("Failed to fetch data.")
@@ -60,9 +64,9 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     if(isMember){
         const chatRoom = await ChatRoom.findByPk(ChatRoomId, {
             attributes: ['id'],
+            order: [[ChatMessages, 'createdAt', 'DESC']],
             include: [{
                 model: ChatMessages,
-                order: [['createdAt', 'DESC']],
                 attributes: { exclude: ["ChatRoomId"]}, 
             },{
                 model: ChatMembers,
