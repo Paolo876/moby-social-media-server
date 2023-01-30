@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
+const { literal, Op } = require("sequelize");
 
 const ChatRoom = require("../models/ChatRoom")
 const ChatMessages = require("../models/ChatMessages")
@@ -92,6 +93,39 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
         throw new Error("Not authorized.")
     }
 }));
+
+
+/*  @desc       Search for chatRooms between user and receipient (Private chat -limited to user and receiver on chatroom only)
+ *  @route      POST /api/chat/search/:id
+ *  @access     Private
+ */
+router.get("/search/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
+    const FriendId = req.params.id;
+    const isChatRoomAvailable = await ChatMembers.findOne({
+        where : { UserId: [ UserId, FriendId ] }, //where UserId is either UserId/FriendId
+        group: "ChatRoomId", 
+        having: literal(`count(*) = 2`),
+        attributes: ["ChatRoomId"]
+    });
+
+    if(isChatRoomAvailable){
+        res.json(isChatRoomAvailable)
+    } else {
+        res.json({ChatRoomId: null})
+    }
+
+}));
+
+
+// /*  @desc       Send a message (creates a new chatRoom if no chatRoom exists between sender and receipient)
+//  *  @route      POST /api/chat/
+//  *  @access     Private
+//  */
+// router.post("/", cookieJwtAuth, asyncHandler( async (req, res) => {
+//     const UserId = req.user.id;
+
+// }));
 
 module.exports = router;
 
