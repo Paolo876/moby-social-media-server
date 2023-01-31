@@ -21,22 +21,31 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         attributes: [],
         order: [[ ChatRoom, 'updatedAt', 'DESC' ]], 
         include: [{
-            model: ChatRoom,
-            attributes: ["id"],
-            include: {
-                model: ChatMessages,
-                limit: 1,
-                order: [['createdAt', 'DESC']],
+                model: ChatRoom,
+                attributes: ["id"],
                 include: [{
-                    model: Users, 
-                    attributes: ['username', 'id'], 
+                    model: ChatMessages,
+                    limit: 1,
+                    order: [['createdAt', 'DESC']],
+                }, {
+                    model: ChatMembers,
+                    attributes: [],
+                    where: { UserId: { [Op.not]: req.user.id } },
                     include: [{
-                        model: UserData,
-                        attributes: ['firstName', 'lastName', 'image']
-                    }],
+                        model: Users, 
+                        attributes: ['username', 'id'],
+                        include: [{
+                            model: UserData,
+                            attributes: ['firstName', 'lastName', 'image']
+                        }],
+                    }]
+                },{
+                    model: ChatMembers,
+                    attributes: ["isLastMessageRead"],
+                    where: { UserId: req.user.id }
                 }]
             }
-        }],
+        ],
     })
 
     if(chatRooms){
