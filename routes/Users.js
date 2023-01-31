@@ -171,7 +171,8 @@ router.get("/search/:q", cookieJwtAuth, asyncHandler( async (req,res) => {
         attributes: ['username', 'id'], 
         include: {
             model: UserData,
-            attributes: ['firstName', 'lastName', 'image']
+            attributes: ['firstName', 'lastName', 'image'],
+            required: true
         },
         where: {
             id: { [sequelize.Op.not]: req.user.id },    //don't include self on search
@@ -179,7 +180,14 @@ router.get("/search/:q", cookieJwtAuth, asyncHandler( async (req,res) => {
                 { 'username': { [sequelize.Op.like]: '%' + query + '%' } },
                 { '$UserDatum.firstName$': { [sequelize.Op.like]: '%' + query + '%' } },
                 { '$UserDatum.lastName$': { [sequelize.Op.like]: '%' + query + '%' } },
-            ]
+                // sequelize.where(
+                //     sequelize.fn('concat', '$UserDatum.lastName$', ' ', '$UserDatum.lastName$'), {
+                //         [sequelize.Op.like]: '%'+query+'%'
+                //     }
+                //   )
+            ],
+
+            
         }
     })
 
