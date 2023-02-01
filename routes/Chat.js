@@ -29,7 +29,8 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
                     order: [['createdAt', 'DESC']],
                 }, {
                     model: ChatMembers,
-                    attributes: [],
+                    attributes: ["id"],
+                    as: "ChatMembers",
                     where: { UserId: { [Op.not]: req.user.id } },
                     include: [{
                         model: Users, 
@@ -39,10 +40,11 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
                             attributes: ['firstName', 'lastName', 'image']
                         }],
                     }]
-                },{
+                }, {
                     model: ChatMembers,
                     attributes: ["isLastMessageRead"],
-                    where: { UserId: req.user.id }
+                    as: "isLastMessageRead",
+                    where: { UserId: req.user.id },
                 }]
             }
         ],
