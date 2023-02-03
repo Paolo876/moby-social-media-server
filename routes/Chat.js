@@ -80,20 +80,22 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
             include: [{
                 model: ChatMessages,
                 attributes: { exclude: ["ChatRoomId"]}, 
-            },{
-                model: ChatMembers,
-                as: "ChatMembers",
-                where: { UserId: { [Op.not]: req.user.id } }, //exclude self
-                attributes: ["id"],
-                include: [{
-                    model: Users, 
-                    attributes: ['username', 'id'], 
-                    include: [{
-                        model: UserData,
-                        attributes: ['firstName', 'lastName', 'image']
-                    }],
-                }]
-            }]
+            },
+            // {
+            //     model: ChatMembers,
+            //     as: "ChatMembers",
+            //     where: { UserId: { [Op.not]: req.user.id } }, //exclude self
+            //     attributes: ["id"],
+            //     include: [{
+            //         model: Users, 
+            //         attributes: ['username', 'id'], 
+            //         include: [{
+            //             model: UserData,
+            //             attributes: ['firstName', 'lastName', 'image']
+            //         }],
+            //     }]
+            // }
+        ]
         })
         if(chatRoom){
             res.json(chatRoom)
