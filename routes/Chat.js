@@ -150,7 +150,7 @@ router.post("/new", cookieJwtAuth, asyncHandler( async (req, res) => {
 
     if(!isChatRoomExisting){
         //create chatroom
-        const { id: ChatRoomId } = await ChatRoom.create();
+        const { id: ChatRoomId, createdAt } = await ChatRoom.create();
 
         //create chatMembers for user & receipient
         await ChatMembers.create({ChatRoomId, UserId, isLastMessageRead: true});
@@ -159,9 +159,9 @@ router.post("/new", cookieJwtAuth, asyncHandler( async (req, res) => {
         //create chatmessage
         await ChatMessages.create({message, media, ChatRoomId, UserId})
 
-        res.json({isExisting: false, ChatRoomId })
+        res.json({isExisting: false, ChatRoomId, createdAt })
     } else {
-        res.json({isExisting: true, ChatRoomId: isChatRoomExisting.ChatRoomId})
+        res.json({isExisting: true, ChatRoomId: isChatRoomExisting.ChatRoomId, createdAt: isChatRoomExisting.createdAt })
     }
 }));
 
