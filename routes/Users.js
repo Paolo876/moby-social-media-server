@@ -199,4 +199,26 @@ router.get("/search/:q", cookieJwtAuth, asyncHandler( async (req,res) => {
     }
 }))
 
+/*  @desc       Get user and userData only
+ *  @route      GET /api/auth/userData/:id
+ *  @access     Private
+ */
+router.get("/userData/:id", cookieJwtAuth, asyncHandler( async (req,res) => {
+    const user = await Users.findByPk(req.params.id, {
+        attributes: ['username', 'id'], 
+        include: {
+            model: UserData,
+            attributes: ['firstName', 'lastName', 'image'],
+            required: true
+        },
+    })
+
+    if(user){
+        res.json(user)
+    } else {
+        res.status(401)
+        throw new Error("No user found.")
+    }
+}))
+
 module.exports = router;
