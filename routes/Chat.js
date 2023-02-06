@@ -17,7 +17,7 @@ const UserData = require("../models/UserData")
  */
 router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
     const chatRooms = await ChatMembers.findAll({
-        where: { UserId: req.user.id },
+        where: { UserId: req.user.id, isActive: true, isArchived: false },
         attributes: [],
         order: [[ ChatRoom, 'updatedAt', 'DESC' ]], 
         include: [{
@@ -27,7 +27,9 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
                     model: ChatMessages,
                     limit: 1,
                     order: [['createdAt', 'DESC']],
-                }, {
+                }, 
+                {
+                    separate: true,
                     model: ChatMembers,
                     attributes: ["id"],
                     as: "ChatMembers",
@@ -40,7 +42,8 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
                             attributes: ['firstName', 'lastName', 'image']
                         }],
                     }]
-                }, {
+                }, 
+                {
                     model: ChatMembers,
                     attributes: ["isLastMessageRead"],
                     as: "isLastMessageRead",
@@ -54,7 +57,6 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         const result = chatRooms.sort((a, b) => {
             if(a.ChatRoom.ChatMessages[0] && b.ChatRoom.ChatMessages[0]) return new Date(b.ChatRoom.ChatMessages[0].createdAt) - new Date(a.ChatRoom.ChatMessages[0].createdAt);
         })
-
         res.json(result)
     } else {
         res.status(401)

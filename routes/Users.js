@@ -149,7 +149,28 @@ router.get("/logout", asyncHandler( async (req,res) => {
  *  @access     Private
  */
 router.get("/bookmarks", cookieJwtAuth, asyncHandler( async (req,res) => {
-    const bookmarks = await Bookmarks.findAll({ where: { UserId: req.user.id }, attributes: ["PostId"]});
+    const bookmarks = await Bookmarks.findAll({ 
+        where: { UserId: req.user.id }, 
+        attributes: ["PostId"],
+        order: [ [ 'createdAt', 'DESC' ]], 
+        include: {
+            model: Posts,
+            include: [{
+                model: Users, 
+                attributes: ['username', 'id'], 
+                include: [{
+                    model: UserData,
+                    attributes: ['firstName', 'lastName', 'image']
+                }]
+            }, {
+                model: Likes,
+                attributes: ['UserId'], 
+            }, {
+                model: Comments,
+                attributes: ['UserId', 'id'], 
+            }]
+        }
+    });
 
     if(bookmarks){
         res.json(bookmarks)
