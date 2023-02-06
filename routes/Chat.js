@@ -81,20 +81,6 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
                 model: ChatMessages,
                 attributes: { exclude: ["ChatRoomId"]}, 
             },
-            // {
-            //     model: ChatMembers,
-            //     as: "ChatMembers",
-            //     where: { UserId: { [Op.not]: req.user.id } }, //exclude self
-            //     attributes: ["id"],
-            //     include: [{
-            //         model: Users, 
-            //         attributes: ['username', 'id'], 
-            //         include: [{
-            //             model: UserData,
-            //             attributes: ['firstName', 'lastName', 'image']
-            //         }],
-            //     }]
-            // }
         ]
         })
         if(chatRoom){
@@ -184,6 +170,27 @@ router.post("/send-message", cookieJwtAuth, asyncHandler( async (req, res) => {
         await ChatMembers.update({isLastMessageRead: false}, { where: { ChatRoomId, UserId: { [Op.not]: UserId }}})
 
         res.json(chatMessage)
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
+    }
+}));
+
+
+/*  @desc       update isLastMessageRead property
+ *  @route      GET /api/chat/read-last-message/:chatRoomId
+ *  @access     Private
+ */
+router.get("/read-last-message/:chatRoomId", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
+    const ChatRoomId = req.params.chatRoomId;
+
+    //check if chatRoom already exists & User is a member
+    const isChatRoomExisting = await ChatMembers.findOne({where : { UserId, ChatRoomId }});
+    if(isChatRoomExisting){
+        await isChatRoomExisting.update({isLastMessageRead: true})
+        await isChatRoomExisting.save();
+        res.json({ isLastMessageRead: true})
     } else {
         res.status(401)
         throw new Error("Not authorized.")
