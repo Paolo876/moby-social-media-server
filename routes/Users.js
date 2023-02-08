@@ -220,6 +220,7 @@ router.get("/search/:q", cookieJwtAuth, asyncHandler( async (req,res) => {
     }
 }))
 
+
 /*  @desc       Get user and userData only
  *  @route      GET /api/auth/userData/:id
  *  @access     Private
@@ -239,6 +240,23 @@ router.get("/userData/:id", cookieJwtAuth, asyncHandler( async (req,res) => {
     } else {
         res.status(401)
         throw new Error("No user found.")
+    }
+}))
+
+
+/*  @desc       Update user informations [settings page]
+ *  @route      PUT /api/auth/update-profile
+ *  @access     Private
+ */
+router.put("/update-profile", cookieJwtAuth, asyncHandler( async (req,res) => {
+    console.log(req.body)
+    const user = await Users.findByPk(req.user.id)
+
+    if(user){
+        res.json(user)
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
     }
 }))
 
