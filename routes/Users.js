@@ -244,11 +244,42 @@ router.get("/userData/:id", cookieJwtAuth, asyncHandler( async (req,res) => {
 }))
 
 
-/*  @desc       Update user informations [settings page]
- *  @route      PUT /api/auth/update-profile
+/*  @desc       Update user profile picture [settings page]
+ *  @route      PUT /api/auth/update-profile-picture
  *  @access     Private
  */
-router.put("/update-profile", cookieJwtAuth, asyncHandler( async (req,res) => {
+router.put("/update-profile-picture", cookieJwtAuth, asyncHandler( async (req,res) => {
+    const isNewProfilePicture = req.body.isNewProfilePicture;
+    const user = await Users.findByPk(req.user.id)
+
+    if(user){
+        const userData = await UserData.findOne({ where: { UserId: req.user.id}})  
+        if(userData){
+            if(isNewProfilePicture){
+                await userData.update({image : req.body.image})
+                await userData.save();
+                res.json({image: req.body.image})
+            } else {
+                //delete from imagekit
+
+                //remove image
+                await userData.update({image : null})
+                await userData.save();
+                res.json({image: null})
+            }
+        }
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
+    }
+}))
+
+
+/*  @desc       Update user informations [settings page]
+ *  @route      PUT /api/auth/update-settings
+ *  @access     Private
+ */
+router.put("/update-settings", cookieJwtAuth, asyncHandler( async (req,res) => {
     const user = await Users.findByPk(req.user.id)
 
     if(user){
