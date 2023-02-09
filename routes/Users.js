@@ -249,11 +249,29 @@ router.get("/userData/:id", cookieJwtAuth, asyncHandler( async (req,res) => {
  *  @access     Private
  */
 router.put("/update-profile", cookieJwtAuth, asyncHandler( async (req,res) => {
-    console.log(req.body)
     const user = await Users.findByPk(req.user.id)
 
     if(user){
-        res.json(user)
+
+        // update UserData
+        const updatedUserData = await UserData.findOne({ where: { UserId: req.user.id}})
+        if(updatedUserData){
+            await updatedUserData.update({...req.body.UserData})
+            await updatedUserData.save();
+        } else {
+            await UserData.create({...req.body.UserData, UserId : req.user.id})
+        }
+
+        // update UserBio
+        const updatedUserBio = await UserBio.findOne({ where: { UserId: req.user.id}})
+        if(updatedUserBio){
+            await updatedUserBio.update({...req.body.UserBio})
+            await updatedUserBio.save();
+        } else {
+            await UserBio.create({...req.body.UserBio, UserId : req.user.id})
+        }
+        
+        res.json(req.body)
     } else {
         res.status(401)
         throw new Error("Not authorized.")
