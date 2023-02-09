@@ -5,7 +5,7 @@ const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../utils/generateToken");
 const sequelize = require('sequelize');
-
+const ImageKit = require("imagekit");
 const Users = require("../models/Users");
 const UserData = require("../models/UserData");
 const UserBio = require("../models/UserBio");
@@ -259,13 +259,27 @@ router.put("/update-profile-picture", cookieJwtAuth, asyncHandler( async (req,re
                 await userData.update({image : req.body.image})
                 await userData.save();
                 res.json({image: req.body.image})
-            } else {
-                //delete from imagekit
 
-                //remove image
-                await userData.update({image : null})
-                await userData.save();
-                res.json({image: null})
+            } else {
+                
+                //delete from imagekit
+                const image = JSON.parse(userData.image)
+                const imagekit = new ImageKit({
+                    publicKey : process.env.IMAGEKIT_PUBLIC_KEY,
+                    privateKey : process.env.IMAGEKIT_PRIVATE_KEY,
+                    urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT
+                });
+                imagekit.deleteFile(image.fileId, async (error) => {
+                    if(error) {
+                        res.status(401)
+                        throw new Error("An error has occurred. Please try again.")
+                    } else {
+                        //remove image
+                        await userData.update({image : null})
+                        await userData.save();
+                        res.json({image: null})
+                    }
+                });
             }
         }
     } else {
