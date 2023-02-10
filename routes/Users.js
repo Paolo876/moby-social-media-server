@@ -253,22 +253,37 @@ router.put("/update-profile-picture", cookieJwtAuth, asyncHandler( async (req,re
     const user = await Users.findByPk(req.user.id)
 
     if(user){
-        const userData = await UserData.findOne({ where: { UserId: req.user.id}})  
+        const userData = await UserData.findOne({ where: { UserId: req.user.id}});
+        const imagekit = new ImageKit({
+            publicKey : process.env.IMAGEKIT_PUBLIC_KEY,
+            privateKey : process.env.IMAGEKIT_PRIVATE_KEY,
+            urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT
+        });
         if(userData){
-            if(isNewProfilePicture){
-                await userData.update({image : req.body.image})
-                await userData.save();
-                res.json({image: req.body.image})
+            const image = JSON.parse(userData.image)
 
+            if(isNewProfilePicture){
+                //if UserData has image, delete file from imagekit the upload new image
+                if(image) {
+                    //delete from imagekit
+                    imagekit.deleteFile(image.fileId, async (error) => {
+                        if(error) {
+                            res.status(401)
+                            throw new Error("An error has occurred. Please try again.")
+                        } else {
+                            //update image property
+                            await userData.update({image : req.body.image})
+                            await userData.save();
+                            res.json({image: req.body.image})
+                        }
+                    });
+                } else {
+                    await userData.update({image : req.body.image})
+                    await userData.save();
+                    res.json({image: req.body.image})
+                }
             } else {
-                
                 //delete from imagekit
-                const image = JSON.parse(userData.image)
-                const imagekit = new ImageKit({
-                    publicKey : process.env.IMAGEKIT_PUBLIC_KEY,
-                    privateKey : process.env.IMAGEKIT_PRIVATE_KEY,
-                    urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT
-                });
                 imagekit.deleteFile(image.fileId, async (error) => {
                     if(error) {
                         res.status(401)
