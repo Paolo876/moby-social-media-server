@@ -26,7 +26,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
             attributes: ['username', 'id'], 
             include: [{
                 model: UserData,
-                attributes: ['firstName', 'lastName', 'image']
+                attributes: ['firstName', 'lastName', 'image'],
             }]
         }, {
             model: Likes,
