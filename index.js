@@ -33,6 +33,7 @@ app.use("/api/posts", require("./routes/Posts"));
 app.use("/api/comments", require("./routes/Comments"));
 app.use("/api/chat", require("./routes/Chat"));
 app.use("/api/imagekit", require("./routes/Imagekit"));
+app.use("/api/friends", require("./routes/Friends"));
 
 
 //custom errorhandling (middleware)

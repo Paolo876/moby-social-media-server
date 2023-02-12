@@ -23,8 +23,8 @@ router.get('/', cookieJwtAuth, asyncHandler((req, res) => {
 }));
 
 // upload product image
-router.post("/product-image", asyncHandler((req,res) => {
-}));
+// router.post("/product-image", asyncHandler((req,res) => {
+// }));
 
 //delete image
 // router.delete("/delete/:id", validateToken, (req,res) => {
