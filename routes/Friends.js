@@ -123,7 +123,6 @@ router.post('/confirm-request/:FriendId', cookieJwtAuth, asyncHandler(async (req
         } else {
             res.status(401)
             throw new Error("Friend request not found.")
-    
         }
     } else {
         if(isRequestExisting) {
