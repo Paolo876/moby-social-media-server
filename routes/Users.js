@@ -21,7 +21,12 @@ const Bookmarks = require("../models/Bookmarks");
  */
 router.post("/login", asyncHandler( async (req, res) => {
     const { username, password } = req.body;
-    const user = await Users.findOne({ where: { username }, include: [{model: UserData}]});
+    const user = await Users.findOne({ 
+        where: { username }, 
+        include: [{
+            model: UserData,
+            attributes: ['firstName', 'lastName', 'image'],
+        }]});
     if(user && (await bcrypt.compare(password, user.password))){
         const { id, username, UserDatum } = user;
         const token = generateToken(id)
