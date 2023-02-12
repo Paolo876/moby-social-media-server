@@ -26,7 +26,15 @@ router.get('/', cookieJwtAuth, asyncHandler(async (req, res) => {
                     model: UserData,
                     attributes: ['firstName', 'lastName', 'image'],
                 }]
-
+            },{
+                model: Users,
+                as: "Requesters",
+                through: { attributes: []},
+                attributes: ['username', 'id'], 
+                include: [{
+                    model: UserData,
+                    attributes: ['firstName', 'lastName', 'image'],
+                }]
             },{
                 model: Users,
                 as: "Requestees",
@@ -37,8 +45,9 @@ router.get('/', cookieJwtAuth, asyncHandler(async (req, res) => {
                     attributes: ['firstName', 'lastName', 'image'],
                 }]
             }
-    ]
+        ]
     })
+
     if(user){
         res.json(user)
     } else {
@@ -90,15 +99,32 @@ router.get('/send-request/:FriendId', cookieJwtAuth, asyncHandler(async (req, re
  *  @route      GET /api/friends/confirm-request/:FriendId
  *  @access     Private
  */
-router.get('/confirm-request/:FriendId', cookieJwtAuth, asyncHandler(async (req, res) => {
+router.post('/confirm-request/:FriendId', cookieJwtAuth, asyncHandler(async (req, res) => {
     const UserId = req.user.id;
     const FriendId = req.params.FriendId;
-
-    const isRequestExisting = await models.friendRequests.findOne({ where: { UserId, FriendId}})    //check if request already exist
+    const isConfirmed = req.body.isConfirmed;
+    const isRequestExisting = await models.friendRequests.findOne({ where: { UserId: FriendId, FriendId: UserId}})    //check if request already exist
     const isAlreadyFriends = await models.friends.findOne({ where: { UserId, FriendId}})    //check if user-friend are already friends
 
     if(!isAlreadyFriends){
+        if(isRequestExisting) {
+            if(isConfirmed){
+                //add as friend
+                await models.friends.create({ UserId, FriendId})
+                await models.friends.create({ UserId: FriendId, FriendId: UserId})
+                await isRequestExisting.destroy();
+                res.json({isConfirmed, FriendId})
+            } else {
+                //delete request
+                await isRequestExisting.destroy();
+                res.json({isConfirmed, FriendId})
+            }
 
+        } else {
+            res.status(401)
+            throw new Error("Friend request not found.")
+    
+        }
     } else {
         if(isRequestExisting) {
             await isRequestExisting.destroy()
