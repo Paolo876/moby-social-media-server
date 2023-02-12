@@ -26,8 +26,8 @@ module.exports = () => {
 
     //user friend
     Users.belongsToMany(Users, { as: "Friends", through: "friends"});
-    Users.belongsToMany(Users, { as: 'Requestees', through: 'friendRequests', foreignKey: 'requesterId', onDelete: 'CASCADE'});
-    Users.belongsToMany(Users, { as: 'Requesters', through: 'friendRequests', foreignKey: 'requesteeId', onDelete: 'CASCADE'});
+    Users.belongsToMany(Users, { as: 'Requestees', through: 'friendRequests', foreignKey: 'UserId', onDelete: 'CASCADE'});      // <-- UserId refers to requester
+    Users.belongsToMany(Users, { as: 'Requesters', through: 'friendRequests', foreignKey: 'FriendId', onDelete: 'CASCADE'});    // <-- FriendId refers to requestee
 
     //comment - user | comment - post
     Comments.belongsTo(Users);
