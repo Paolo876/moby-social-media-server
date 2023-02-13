@@ -111,8 +111,6 @@ router.get('/send-request/:FriendId', cookieJwtAuth, asyncHandler(async (req, re
             }]
         })
         res.json({isFriends: true, FriendId, User})
-        // res.status(401)
-        // throw new Error("You are already friends with this user.")
     }
 }));
 
@@ -127,6 +125,7 @@ router.post('/confirm-request/:FriendId', cookieJwtAuth, asyncHandler(async (req
     const isConfirmed = req.body.isConfirmed;
     const isRequestExisting = await models.friendRequests.findOne({ where: { UserId: FriendId, FriendId: UserId}})    //check if request already exist
     const isAlreadyFriends = await models.friends.findOne({ where: { UserId, FriendId}})    //check if user-friend are already friends
+    const isFriendSentRequest = await models.friendRequests.findOne({ where: { UserId: FriendId, FriendId: UserId}})    //check if friend already sent request
 
     if(!isAlreadyFriends){
         if(isRequestExisting) {
@@ -135,23 +134,36 @@ router.post('/confirm-request/:FriendId', cookieJwtAuth, asyncHandler(async (req
                 await models.friends.create({ UserId, FriendId})
                 await models.friends.create({ UserId: FriendId, FriendId: UserId})
                 await isRequestExisting.destroy();
-                res.json({isConfirmed, FriendId})
+                const User = await Users.findByPk(FriendId, {
+                    attributes: ['username', 'id'], 
+                    include: [{
+                        model: UserData,
+                        attributes: ['firstName', 'lastName', 'image']
+                    }]
+                })
+                res.json({isConfirmed, FriendId, User})
             } else {
                 //delete request
                 await isRequestExisting.destroy();
+                if(isFriendSentRequest) await isFriendSentRequest.destroy();
                 res.json({isConfirmed, FriendId})
             }
 
         } else {
-            res.status(401)
-            throw new Error("Friend request not found.")
+            res.json({isNotFound: true, FriendId})
+
         }
     } else {
-        if(isRequestExisting) {
-            await isRequestExisting.destroy()
-        }
-        res.status(401)
-        throw new Error("You are already friends with this user.")
+        if(isRequestExisting) await isRequestExisting.destroy();        //  cancel/delete friend request if exists.
+        if(isFriendSentRequest) await isFriendSentRequest.destroy();
+        const User = await Users.findByPk(FriendId, {
+            attributes: ['username', 'id'], 
+            include: [{
+                model: UserData,
+                attributes: ['firstName', 'lastName', 'image']
+            }]
+        })
+        res.json({isFriends: true, FriendId, User})
     }
 }));
 
