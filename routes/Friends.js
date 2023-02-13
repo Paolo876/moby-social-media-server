@@ -74,8 +74,15 @@ router.get('/send-request/:FriendId', cookieJwtAuth, asyncHandler(async (req, re
             //confirm friends
             await isFriendSentRequest.destroy();
             await models.friends.create({ UserId, FriendId})
-            await models.friends.create({ UserId: FriendId, FriendId: UserId})
-            res.json({isFriends: true, FriendId})
+            await models.friends.create({ UserId: FriendId, FriendId: UserId});
+            const User = await Users.findByPk(FriendId, {
+                attributes: ['username', 'id'], 
+                include: [{
+                    model: UserData,
+                    attributes: ['firstName', 'lastName', 'image']
+                }]
+            })
+            res.json({isFriends: true, FriendId, User})
         }
 
         if(isRequestExisting){
@@ -96,8 +103,16 @@ router.get('/send-request/:FriendId', cookieJwtAuth, asyncHandler(async (req, re
     } else {
         if(isRequestExisting) await isRequestExisting.destroy();        //  cancel/delete friend request if exists.
         if(isFriendSentRequest) await isFriendSentRequest.destroy();
-        res.status(401)
-        throw new Error("You are already friends with this user.")
+        const User = await Users.findByPk(FriendId, {
+            attributes: ['username', 'id'], 
+            include: [{
+                model: UserData,
+                attributes: ['firstName', 'lastName', 'image']
+            }]
+        })
+        res.json({isFriends: true, FriendId, User})
+        // res.status(401)
+        // throw new Error("You are already friends with this user.")
     }
 }));
 
