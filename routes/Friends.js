@@ -133,4 +133,26 @@ router.post('/confirm-request/:FriendId', cookieJwtAuth, asyncHandler(async (req
     }
 }));
 
+
+/*  @desc       unfriend user
+ *  @route      GET /api/friends/unfriend/:FriendId
+ *  @access     Private
+ */
+router.get('/unfriend/:FriendId', cookieJwtAuth, asyncHandler(async (req, res) => {
+    const UserId = req.user.id;
+    const FriendId = req.params.FriendId;
+
+    const isFriends = await models.friends.findOne({ where: { UserId , FriendId}})    //check if user-friend are friends
+
+    if(isFriends){
+        await isFriends.destroy();
+        await models.friends.destroy({where: {UserId: FriendId , FriendId: UserId}})
+        res.json({isFriends: false, FriendId})
+    } else {
+        res.status(401)
+        throw new Error("You are not friends with this user.")
+    }
+    
+}));
+
 module.exports = router;
