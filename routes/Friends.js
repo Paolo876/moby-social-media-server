@@ -66,9 +66,18 @@ router.get('/send-request/:FriendId', cookieJwtAuth, asyncHandler(async (req, re
     const FriendId = req.params.FriendId;
 
     const isRequestExisting = await models.friendRequests.findOne({ where: { UserId, FriendId}})    //check if request already exist
+    const isFriendSentRequest = await models.friendRequests.findOne({ where: { UserId: FriendId, FriendId: UserId}})    //check if friend already sent request
     const isAlreadyFriends = await models.friends.findOne({ where: { UserId, FriendId}})    //check if user-friend are already friends
 
     if(!isAlreadyFriends){
+        if(isFriendSentRequest){
+            //confirm friends
+            await isFriendSentRequest.destroy();
+            await models.friends.create({ UserId, FriendId})
+            await models.friends.create({ UserId: FriendId, FriendId: UserId})
+            res.json({isFriends: true, FriendId})
+        }
+
         if(isRequestExisting){
             //cancel/ delete friend request if exists.
             await isRequestExisting.destroy();
@@ -85,10 +94,8 @@ router.get('/send-request/:FriendId', cookieJwtAuth, asyncHandler(async (req, re
             res.json({isRequested: true, FriendId, User})
         }
     } else {
-        if(isRequestExisting){
-            //cancel/ delete friend request if exists.
-            await isRequestExisting.destroy();
-        }
+        if(isRequestExisting) await isRequestExisting.destroy();        //  cancel/delete friend request if exists.
+        if(isFriendSentRequest) await isFriendSentRequest.destroy();
         res.status(401)
         throw new Error("You are already friends with this user.")
     }
