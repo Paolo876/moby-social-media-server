@@ -219,12 +219,8 @@ router.get('/unfriend/:FriendId', cookieJwtAuth, asyncHandler(async (req, res) =
     if(isFriends){
         await isFriends.destroy();
         await models.friends.destroy({where: {UserId: FriendId , FriendId: UserId}})
-        res.json({isFriends: false, FriendId})
-    } else {
-        res.status(401)
-        throw new Error("You are not friends with this user.")
-    }
-    
+    } 
+    res.json({isFriends: false, FriendId})
 }));
 
 module.exports = router;
