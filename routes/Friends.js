@@ -57,6 +57,44 @@ router.get('/', cookieJwtAuth, asyncHandler(async (req, res) => {
 }));
 
 
+/*  @desc       get friends list by user's id
+ *  @route      GET /api/friends/
+ *  @access     Private
+ */
+router.get('/friends-list/:id', cookieJwtAuth, asyncHandler(async (req, res) => {
+    //make sure user and id passed are friends;
+    const UserId = req.user.id;
+    const isFriends = await models.friends.findOne({ where: { UserId, FriendId: req.params.id } })    //check if user-friend are already friends
+
+    if(isFriends){
+        const user = await Users.findByPk(req.params.id, {
+            attributes: [], 
+            include: [
+                {
+                    model: Users,
+                    as: "Friends",
+                    through: { attributes: []},
+                    attributes: ['username', 'id'], 
+                    include: [{
+                        model: UserData,
+                        attributes: ['firstName', 'lastName', 'image'],
+                    }]
+                }
+            ]
+        })
+        if(user){
+            res.json(user)
+        } else {
+            res.status(401)
+            throw new Error("Failed to fetch friends.")
+        }
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
+    }
+}));
+
+
 /*  @desc       send/cancel friend request (if request exists, delete from db, else create)
  *  @route      GET /api/friends/send-request/:FriendId
  *  @access     Private
