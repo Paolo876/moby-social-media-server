@@ -6,6 +6,7 @@ const UserData = require("../models/UserData")
 const Bookmarks = require("../models/Bookmarks")
 const Likes = require("../models/Likes");
 const Comments = require("../models/Comments");
+const ImageKit = require("imagekit");
 
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
@@ -157,10 +158,31 @@ router.put("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
  *  @access     Private
  */
 router.delete("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
-    const post = await Posts.findOne({where: { Id: req.params.id, UserId: req.user.id }})
+    const post = await Posts.findOne({where: { id: req.params.id, UserId: req.user.id }})
     if(post){
-        await post.destroy();
-        res.json(req.params.id)
+        if(post.image){
+            const imagekit = new ImageKit({
+                publicKey : process.env.IMAGEKIT_PUBLIC_KEY,
+                privateKey : process.env.IMAGEKIT_PRIVATE_KEY,
+                urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT
+            });
+            const image = JSON.parse(post.image)
+
+            imagekit.deleteFile(image.fileId, async (error) => {
+                if(error) {
+                    res.status(401)
+                    throw new Error("An error has occurred. Please try again.")
+                } else {
+                    //delete post
+                    await post.destroy();
+                    res.json(req.params.id)
+                }
+            });
+        }else {
+            await post.destroy();
+            res.json(req.params.id)
+        }
+
     } else {
         res.status(401)
         throw new Error("Not authorized.")
