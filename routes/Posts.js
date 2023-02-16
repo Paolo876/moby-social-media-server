@@ -140,12 +140,33 @@ router.post("/create", cookieJwtAuth, asyncHandler( async (req, res) => {
  *  @access     Private
  */
 router.put("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
-    const data = req.body
-    let post = await Posts.findOne({where: { id: req.params.id, UserId: req.user.id }})
+    const data = req.body.data;
+    const isImageNew = req.body.isImageNew;
+    const post = await Posts.findOne({where: { id: req.params.id, UserId: req.user.id }})
     if(post){
-        await post.update({...data})
-        await post.save();
-        res.json(post)
+        const imagekit = new ImageKit({
+            publicKey : process.env.IMAGEKIT_PUBLIC_KEY,
+            privateKey : process.env.IMAGEKIT_PRIVATE_KEY,
+            urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT
+        });
+        
+        if(post.image && isImageNew){    //if image is deleted on post
+            const image = JSON.parse(post.image)
+            imagekit.deleteFile(image.fileId, async (error) => {
+                if(error) {
+                    res.status(401)
+                    throw new Error("An error has occurred. Please try again.")
+                } else {
+                    await post.update({...data})
+                    await post.save();
+                    res.json(post)
+                }
+            });
+        } else {
+            await post.update({...data})
+            await post.save();
+            res.json(post)
+        }
     } else {
         res.status(401)
         throw new Error("Not authorized.")
