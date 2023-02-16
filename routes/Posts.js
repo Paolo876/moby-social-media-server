@@ -224,4 +224,19 @@ router.get("/bookmark/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
+/*  @desc       authorize post. fetched before edit, check if the user logged in is the post's author
+ *  @route      GET /api/posts/bookmark/:id
+ *  @access     Private
+ */
+router.get("/authorize/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const post = await Posts.findOne({where: { id: req.params.id, UserId: req.user.id}});
+
+    if(post){
+        res.json(post)
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")}
+}));
+
+
 module.exports = router;
