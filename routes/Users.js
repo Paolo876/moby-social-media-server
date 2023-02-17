@@ -212,8 +212,6 @@ router.get("/search/:q", cookieJwtAuth, asyncHandler( async (req,res) => {
                 //     }
                 //   )
             ],
-
-            
         }
     })
 

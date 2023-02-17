@@ -28,6 +28,7 @@ const PORT = process.env.PORT || 3001;
 
 //routes
 app.get("/", (req,res) => res.send("APP IS ONLINE..."))
+app.use("/api/main", require("./routes/Main"));
 app.use("/api/auth", require("./routes/Users"));
 app.use("/api/posts", require("./routes/Posts"));
 app.use("/api/comments", require("./routes/Comments"));
