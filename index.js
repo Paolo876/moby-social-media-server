@@ -25,7 +25,6 @@ const sequelize = require("./config/database");
 //load db models
 require("./utils/importDBModels")()
 require("./models/associations/associations")()
-const PORT = process.env.PORT || 3001;
 
 //routes
 app.get("/", (req,res) => res.send("APP IS ONLINE..."))
@@ -48,9 +47,24 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const httpServer = createServer(app);
 const io = new Server(httpServer);
+// io.attach(httpServer)
+io.on('connection', (socket) => {
+    console.log(socket.id);
+    socket.on('disconnect', () => {
+      console.log('user disconnected');
+    });
+  });
 app.set("socketio", io);
 
+// const friendHandlers = require("./events/friendHandlers");
+// const chatHandlers = require("./events/chatHandlers");
 
+// io.of("users").on("connection", async (socket) => userHandlers(io, socket))
+// io.of("friends").on("connection", async (socket) => friendHandlers(io, socket))
 
-app.listen(PORT, () => console.log("LISTENING TO PORT", PORT))
+const PORT = process.env.PORT || 3001;
+
+httpServer.listen(PORT, () => console.log("LISTENING TO PORT", PORT));
+
+// app.listen(PORT, () => console.log("LISTENING TO PORT", PORT))
 

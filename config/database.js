@@ -12,7 +12,7 @@ const testDBConnection = async () => {
     try {
         await sequelize.authenticate();
         console.log('Connection has been established successfully.');
-        console.log("DB Models:", sequelize.models)
+        // console.log("DB Models:", sequelize.models)
 
       } catch (error) {
         console.error('Unable to connect to the database:', error);
