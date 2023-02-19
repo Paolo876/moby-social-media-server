@@ -50,7 +50,7 @@ module.exports = () => {
     Users.hasMany(Posts, { foreignKey: "UserId", onDelete: "CASCADE"});
     
     //chatroom - user
-    ChatRoom.belongsToMany(Users, {as: "members", through: "ChatUsers" });
+    ChatRoom.belongsToMany(Users, {as: "members", through: "ChatMembers" });
 
     //chatroom - chatmember
     ChatRoom.hasMany(ChatMembers, { as: "ChatMembers", foreignKey: "ChatRoomId",onDelete: "CASCADE" });

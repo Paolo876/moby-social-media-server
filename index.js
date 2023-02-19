@@ -21,6 +21,7 @@ app.use(cookieParser());
 
 
 const sequelize = require("./config/database"); 
+
 //load db models
 require("./utils/importDBModels")()
 require("./models/associations/associations")()
@@ -40,6 +41,16 @@ app.use("/api/friends", require("./routes/Friends"));
 //custom errorhandling (middleware)
 app.use(notFound)
 app.use(errorHandler)
+
+
+//socket io
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+app.set("socketio", io);
+
+
 
 app.listen(PORT, () => console.log("LISTENING TO PORT", PORT))
 
