@@ -5,6 +5,7 @@ const UserSockets = sequelize.define('UserSockets', {
     socket: {
         type: DataTypes.STRING,
         allowNull: false,
+        primaryKey: true
     }
 },
 {

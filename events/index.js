@@ -1,25 +1,39 @@
 
 const jwt = require("jsonwebtoken");
 const parseCookie = require("../utils/parseCookie")
+const UserSockets = require("../models/UserSockets")
 
-
-const index = (io, socket) => {
+const index = async (io, socket) => {
 
   /* @desc  get user data on login/authorization
   *         userId is saved on the httpcookie 'token'
   */
-  socket.on('login', () => {
-      console.log("COOKIE", socket.request.headers.cookie)
-      const userId = authorizeToken(socket.request.headers.cookie)
-      console.log("logged in", userId, socket.id)
+  socket.on('login', async () => {
+      if(socket.request.headers.cookie && socket.request.headers.cookie !== "none"){
+        const UserId = authorizeToken(socket.request.headers.cookie)
+        console.log(UserId)
+        if(UserId){
+          const isSocketExisting = await UserSockets.findOne({ where: {socket: socket.id, UserId}})
+          if(!isSocketExisting) {
+            await UserSockets.create({socket: socket.id, UserId})
+          }
+  
+        }
+      }
+
   })
 
 
   /* @desc  disconnect/logout user
   *         triggers when a user logout or connection is closed
   */
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log('user disconnected', socket.id);
+    const isSocketExisting = await UserSockets.findOne({ where: {socket: socket.id }})
+
+    if(isSocketExisting) {
+      await isSocketExisting.destroy();
+    }
   });
 
 }
