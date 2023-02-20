@@ -8,6 +8,7 @@ const sequelize = require('sequelize');
 const ImageKit = require("imagekit");
 const Users = require("../models/Users");
 const UserData = require("../models/UserData");
+const UserStatus = require("../models/UserStatus");
 const UserBio = require("../models/UserBio");
 const Posts = require("../models/Posts");
 const Likes = require("../models/Likes");
@@ -26,12 +27,16 @@ router.post("/login", asyncHandler( async (req, res) => {
         include: [{
             model: UserData,
             attributes: ['firstName', 'lastName', 'image'],
-        }]});
+        }, {
+            model: UserStatus,
+            attributes: ['status'],
+        }
+    ]});
     if(user && (await bcrypt.compare(password, user.password))){
         const { id, username, UserDatum } = user;
         const token = generateToken(id)
         res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true }) //send the user id on token
-        res.json({id, username, UserData: UserDatum})
+        res.json({id, username, UserData: UserDatum, UserStatus: user.UserStatus})
     } else {
         res.status(401)
         throw new Error("Invalid email or password.")
@@ -83,11 +88,11 @@ router.get("/profile/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
  *  @access     Private
  */
 router.get("/authorize", cookieJwtAuth, asyncHandler( async (req,res) => {
-    const user = await Users.findByPk(req.user.id, { include: [{model: UserData}] })
-    const { id, username, UserDatum } = user;
+    const user = await Users.findByPk(req.user.id, { include: [{model: UserData}, { model: UserStatus, attributes: ['status']}] })
+    const { id, username, UserDatum,  } = user;
 
     if(user){
-        res.json({id, username, UserData: UserDatum})
+        res.json({id, username, UserData: UserDatum, UserStatus: user.UserStatus})
     } else {
         res.clearCookie("token");
         throw new Error("Not authorized, invalid token.")
@@ -111,7 +116,7 @@ router.post("/signup", asyncHandler( async (req,res) => {
         const { id, username } = user;
         const token = generateToken(id)
         res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true }) //send the user id on token
-        res.status(201).json({id, username, UserData: null})
+        res.status(201).json({id, username, UserData: null, UserStatus: { status: "online"}})
     } else {
         res.status(400)
         throw new Error("Invalid user data.")

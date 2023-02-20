@@ -42,8 +42,11 @@ const index = async (io, socket) => {
 //decode cookies
 const authorizeToken = (cookie) => {
     const token = parseCookie(cookie).token
-    const user = jwt.verify(token, process.env.JWT_SECRET);    
-    return user.id;
+    if(token){
+      const user = jwt.verify(token, process.env.JWT_SECRET);    
+      return user.id;
+    }
+    return false;
 }
 
 module.exports = index;
