@@ -11,9 +11,9 @@ const index = async (io, socket) => {
   socket.on('login', async () => {
       if(socket.request.headers.cookie && socket.request.headers.cookie !== "none"){
         const UserId = authorizeToken(socket.request.headers.cookie)
-        console.log(UserId)
+
         if(UserId){
-          const isSocketExisting = await UserSockets.findOne({ where: {socket: socket.id, UserId}})
+          const isSocketExisting = await UserSockets.findByPk(socket.id)
           if(!isSocketExisting) {
             await UserSockets.create({socket: socket.id, UserId})
           }
@@ -29,7 +29,7 @@ const index = async (io, socket) => {
   */
   socket.on('disconnect', async () => {
     console.log('user disconnected', socket.id);
-    const isSocketExisting = await UserSockets.findOne({ where: {socket: socket.id }})
+    const isSocketExisting = await UserSockets.findByPk(socket.id)
 
     if(isSocketExisting) {
       await isSocketExisting.destroy();

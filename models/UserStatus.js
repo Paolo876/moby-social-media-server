@@ -5,7 +5,11 @@ const UserStatus = sequelize.define('UserStatus', {
     status: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
+        defaultValue: "online"
+    }
+}, {
+    timestamps: false,
+    
 })
 
 
