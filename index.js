@@ -20,9 +20,10 @@ app.use(cors(
 app.use(cookieParser());
 
 
-const sequelize = require("./config/database"); 
+
 
 //load db models
+require("./config/database"); 
 require("./utils/importDBModels")()
 require("./models/associations/associations")()
 

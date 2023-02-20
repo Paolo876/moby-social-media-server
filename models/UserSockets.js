@@ -1,12 +1,15 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require("../config/database");
 
-const UserStatus = sequelize.define('UserStatus', {
-    status: {
+const UserSockets = sequelize.define('UserSockets', {
+    socket: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
+    }
+},
+{
+    timestamps: false
 })
 
 
-module.exports = UserStatus
+module.exports = UserSockets

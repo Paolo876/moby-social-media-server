@@ -12,6 +12,7 @@ const testDBConnection = async () => {
     try {
         await sequelize.authenticate();
         console.log('Connection has been established successfully.');
+        await sequelize.models.UserSockets.truncate()
         // console.log("DB Models:", sequelize.models)
 
       } catch (error) {
