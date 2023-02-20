@@ -312,6 +312,20 @@ router.put("/update-profile-picture", cookieJwtAuth, asyncHandler( async (req,re
 }))
 
 
+
+/*  @desc       Change user status
+ *  @route      PUT /api/auth/update-status
+ *  @access     Private
+ */
+router.put("/update-status", cookieJwtAuth, asyncHandler( async (req,res) => {
+    const status = req.body.status;
+    const updatedUserStatus = await UserStatus.findOne({ where: { UserId: req.user.id}})
+    updatedUserStatus.status = status;
+    updatedUserStatus.save();
+    res.json({status})
+}))
+
+
 /*  @desc       Update user informations [settings page]
  *  @route      PUT /api/auth/update-settings
  *  @access     Private
@@ -345,5 +359,6 @@ router.put("/update-settings", cookieJwtAuth, asyncHandler( async (req,res) => {
         throw new Error("Not authorized.")
     }
 }))
+
 
 module.exports = router;
