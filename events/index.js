@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 
 const index = async (io, socket) => {
 
-  /* @desc  get user data on login/authorization
+  /* @desc  get user data on login/authorization (if connection has a cookie/token, a user is logged in)
   *         userId is saved on the httpcookie 'token'
   */
   if(socket.request.headers.cookie && socket.request.headers.cookie !== "token=none"){
