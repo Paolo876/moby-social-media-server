@@ -13,14 +13,17 @@ const index = async (io, socket) => {
   socket.on('login', async () => {
       if(socket.request.headers.cookie && socket.request.headers.cookie !== "none"){
         const UserId = authorizeToken(socket.request.headers.cookie)
-        console.log("HELLO")
         if(UserId){
           const isSocketExisting = await UserSockets.findByPk(socket.id)
           if(!isSocketExisting) {
             await UserSockets.create({socket: socket.id, UserId})
             const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
+
+            //emit online friends to user
+            socket.emit("online-friends", [...new Set(onlineFriends.map(item => item.UserId))])     //duplicated UserId entries are removed with Set() method
             
-            console.log(friends)
+            //emit userId to friends' sockets
+            onlineFriends.forEach(item => socket.to(item.socket).emit("logged-in-friend", UserId))
           }
         }
       }
