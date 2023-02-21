@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Users = require("../models/Users");
 const UserData = require("../models/UserData")
+const UserStatus = require("../models/UserStatus")
 const { models } = require('../config/database');
 
 
@@ -25,7 +26,10 @@ router.get('/', cookieJwtAuth, asyncHandler(async (req, res) => {
                 include: [{
                     model: UserData,
                     attributes: ['firstName', 'lastName', 'image'],
-                }]
+                },{
+                    model: UserStatus,
+                }
+            ]
             },{
                 model: Users,
                 as: "Requesters",
