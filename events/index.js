@@ -11,10 +11,12 @@ const index = async (io, socket) => {
   *         userId is saved on the httpcookie 'token'
   */
   socket.on('login', async () => {
-      if(socket.request.headers.cookie && socket.request.headers.cookie !== "none"){
+      if(socket.request.headers.cookie && socket.request.headers.cookie !== "token=none"){
+        console.log(socket.request.headers.cookie)
         const UserId = authorizeToken(socket.request.headers.cookie)
         if(UserId){
           const isSocketExisting = await UserSockets.findByPk(socket.id)
+          const isUserAlreadyLoggedIn = await UserSockets.findOne({where: { UserId }})
           if(!isSocketExisting) {
             await UserSockets.create({socket: socket.id, UserId})
             const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
@@ -23,7 +25,7 @@ const index = async (io, socket) => {
             socket.emit("online-friends", [...new Set(onlineFriends.map(item => item.UserId))])     //duplicated UserId entries are removed with Set() method
             
             //emit userId to friends' sockets
-            onlineFriends.forEach(item => socket.to(item.socket).emit("logged-in-friend", UserId))
+            if(!isUserAlreadyLoggedIn) onlineFriends.forEach(item => socket.to(item.socket).emit("logged-in-friend", UserId))
           }
         }
       }
@@ -54,9 +56,13 @@ const index = async (io, socket) => {
 //decode cookies
 const authorizeToken = (cookie) => {
     const token = parseCookie(cookie).token
-    if(token){
-      const user = jwt.verify(token, process.env.JWT_SECRET);    
-      return user.id;
+    try {
+      if(token){
+        const user = jwt.verify(token, process.env.JWT_SECRET);    
+        return user.id;
+      }
+    } catch(err) {
+      return false
     }
     return false;
 }
