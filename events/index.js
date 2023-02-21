@@ -34,12 +34,17 @@ const index = async (io, socket) => {
   /* @desc  disconnect/logout user
   *         triggers when a user logout or connection is closed
   */
-  socket.on('disconnect', async () => {
-    // console.log('user disconnected', socket.id);
+  socket.on('disconnect' || 'logout', async () => {
+    const UserId = authorizeToken(socket.request.headers.cookie)
     const isSocketExisting = await UserSockets.findByPk(socket.id)
-
     if(isSocketExisting) {
       await isSocketExisting.destroy();
+
+      const isUserDisconnected = await UserSockets.findAll({where: {UserId}})     //no more connections from the user
+      if(isUserDisconnected.length === 0) {
+        const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
+        onlineFriends.forEach(item => socket.to(item.socket).emit("logged-out-friend", UserId))   //emit logout to online friends
+      }
     }
   });
 
