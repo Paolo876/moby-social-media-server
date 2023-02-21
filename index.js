@@ -48,7 +48,7 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cookie: true
+  cookie: true,
 });
 
 io.on("connection", async (socket) => require("./events/index")(io, socket))

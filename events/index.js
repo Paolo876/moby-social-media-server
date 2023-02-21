@@ -10,27 +10,23 @@ const index = async (io, socket) => {
   /* @desc  get user data on login/authorization
   *         userId is saved on the httpcookie 'token'
   */
-  socket.on('login', async () => {
-      if(socket.request.headers.cookie && socket.request.headers.cookie !== "token=none"){
-        console.log(socket.request.headers.cookie)
-        const UserId = authorizeToken(socket.request.headers.cookie)
-        if(UserId){
-          const isSocketExisting = await UserSockets.findByPk(socket.id)
-          const isUserAlreadyLoggedIn = await UserSockets.findOne({where: { UserId }})
-          if(!isSocketExisting) {
-            await UserSockets.create({socket: socket.id, UserId})
-            const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
+  if(socket.request.headers.cookie && socket.request.headers.cookie !== "token=none"){
+    const UserId = authorizeToken(socket.request.headers.cookie)
+    if(UserId){
+      const isSocketExisting = await UserSockets.findByPk(socket.id)
+      const isUserAlreadyLoggedIn = await UserSockets.findOne({where: { UserId }})
+      if(!isSocketExisting) {
+        await UserSockets.create({socket: socket.id, UserId})
+        const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
 
-            //emit online friends to user
-            socket.emit("online-friends", [...new Set(onlineFriends.map(item => item.UserId))])     //duplicated UserId entries are removed with Set() method
-            
-            //emit userId to friends' sockets
-            if(!isUserAlreadyLoggedIn) onlineFriends.forEach(item => socket.to(item.socket).emit("logged-in-friend", UserId))
-          }
-        }
+        //emit online friends to user
+        socket.emit("online-friends", [...new Set(onlineFriends.map(item => item.UserId))])     //duplicated UserId entries are removed with Set() method
+        
+        //emit userId to friends' sockets
+        if(!isUserAlreadyLoggedIn) onlineFriends.forEach(item => socket.to(item.socket).emit("logged-in-friend", UserId))
       }
-
-  })
+    }
+  }
 
 
   /* @desc  disconnect/logout user
