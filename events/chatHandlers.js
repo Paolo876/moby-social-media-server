@@ -6,22 +6,23 @@ const { Op } = require('sequelize');
 
 const chatHandlers = async (socket, myUserId) => {
 
-    /* @desc  disconnect/logout user
-    *         triggers when a user logout or connection is closed
+    /* @desc  send-message
+    *         triggers when a user sent a message. Message is then emitted to chatroom members sockets excluding current socket of sender
     */
    socket.on("send-message", async (data) => {
     const { users, ChatRoomId, message } = data;
+    const socketsList = await findUserSockets( users, myUserId, socket.id)
 
-    const sockets = await findUserSockets( users, myUserId, socket.id)
-    console.log(sockets)
-    //emit if sockets.length !== 0
+    //emit message to chatmember sockets(other user's sockets included)
+    if(socketsList.length !== 0 ) socketsList.forEach(item => socket.to(item.socket).emit("receive-message", { senderId: myUserId, ChatRoomId, message }))
    })
+
+
 }
 
 const findUserSockets = async( users, myUserId=null, excludeSocket=null) => {
 
   if(myUserId) users.push(myUserId)
-  console.log(users)
   const result = await UserSockets.findAll({
     where: { UserId: {[Op.in]: users}, socket: {[Op.not]: excludeSocket}},
     raw: true
