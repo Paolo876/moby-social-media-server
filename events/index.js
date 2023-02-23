@@ -25,39 +25,69 @@ const index = async (io, socket) => {
         //emit userId to friends' sockets
         if(!isUserAlreadyLoggedIn) onlineFriends.forEach(item => socket.to(item.socket).emit("logged-in-friend", UserId))
       }
+
+
+      /* @desc  on statusChange
+      *         triggers when a user changes status
+      */
+      socket.on('status-change', async (data) => {
+        const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
+        onlineFriends.forEach(item => socket.to(item.socket).emit("status-changed-friend", {status: data, UserId}))   //emit logout to online friends
+      });
+
+      
+
+      /* @desc  disconnect/logout user
+      *         triggers when a user logout or connection is closed
+      */
+      socket.on('disconnect' || 'logout', async () => {
+        const isSocketExisting = await UserSockets.findByPk(socket.id)
+        if(isSocketExisting) {
+          await isSocketExisting.destroy();
+          const isUserDisconnected = await UserSockets.findAll({where: {UserId}})     //no more connections from the user
+          if(isUserDisconnected.length === 0) {
+            const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
+            onlineFriends.forEach(item => socket.to(item.socket).emit("logged-out-friend", UserId))   //emit logout to online friends
+          }
+        }  
+      });
+
+
+      //require chat handlers
+      await require("./chatHandlers")(socket, UserId)
     }
   }
 
   
-  /* @desc  on statusChange
-  *         triggers when a user changes status
-  */
-  socket.on('status-change', async (data) => {
-    const UserId = authorizeToken(socket.request.headers.cookie)
-    if(UserId){
-      const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
-      onlineFriends.forEach(item => socket.to(item.socket).emit("status-changed-friend", {status: data, UserId}))   //emit logout to online friends
-    }
-  })
+  // /* @desc  on statusChange
+  // *         triggers when a user changes status
+  // */
+  // socket.on('status-change', async (data) => {
+  //   const UserId = authorizeToken(socket.request.headers.cookie)
+  //   if(UserId){
+  //     const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
+  //     onlineFriends.forEach(item => socket.to(item.socket).emit("status-changed-friend", {status: data, UserId}))   //emit logout to online friends
+  //   }
+  // })
 
 
-  /* @desc  disconnect/logout user
-  *         triggers when a user logout or connection is closed
-  */
-  socket.on('disconnect' || 'logout', async () => {
-    const UserId = authorizeToken(socket.request.headers.cookie)
-    if(UserId){
-      const isSocketExisting = await UserSockets.findByPk(socket.id)
-      if(isSocketExisting) {
-        await isSocketExisting.destroy();
-        const isUserDisconnected = await UserSockets.findAll({where: {UserId}})     //no more connections from the user
-        if(isUserDisconnected.length === 0) {
-          const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
-          onlineFriends.forEach(item => socket.to(item.socket).emit("logged-out-friend", UserId))   //emit logout to online friends
-        }
-      }  
-    }
-  });
+  // /* @desc  disconnect/logout user
+  // *         triggers when a user logout or connection is closed
+  // */
+  // socket.on('disconnect' || 'logout', async () => {
+  //   const UserId = authorizeToken(socket.request.headers.cookie)
+  //   if(UserId){
+  //     const isSocketExisting = await UserSockets.findByPk(socket.id)
+  //     if(isSocketExisting) {
+  //       await isSocketExisting.destroy();
+  //       const isUserDisconnected = await UserSockets.findAll({where: {UserId}})     //no more connections from the user
+  //       if(isUserDisconnected.length === 0) {
+  //         const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
+  //         onlineFriends.forEach(item => socket.to(item.socket).emit("logged-out-friend", UserId))   //emit logout to online friends
+  //       }
+  //     }  
+  //   }
+  // });
 
 }
 
