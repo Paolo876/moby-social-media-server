@@ -1,5 +1,6 @@
 const checkOnlineFriends = require("../utils/checkOnlineFriends");
 const Users = require("../models/Users")
+const UserData = require("../models/UserData")
 const UserSockets = require("../models/UserSockets")
 const { Op } = require('sequelize');
 
@@ -14,7 +15,14 @@ const chatHandlers = async (socket, myUserId) => {
     const socketsList = await findUserSockets( users, myUserId, socket.id)
 
     //emit message to chatmember sockets(other user's sockets included)
-    if(socketsList.length !== 0 ) socketsList.forEach(item => socket.to(item.socket).emit("receive-message", { senderId: myUserId, ChatRoomId, message }))
+    if(socketsList.length !== 0 ) {
+        let sender = { UserId: myUserId }
+        if(socketsList.some(item => item.UserId !== myUserId)) {
+            const User = await getUserData(myUserId)
+            if(User) sender = {...sender, User}
+        }
+        socketsList.forEach(item => socket.to(item.socket).emit("receive-message", { sender, ChatRoomId, message }))
+    }
    })
 
 
@@ -29,6 +37,19 @@ const findUserSockets = async( users, myUserId=null, excludeSocket=null) => {
   })
 
   return result
+}
+
+const getUserData = async (id) => {
+    const user = await Users.findByPk(id, {
+        attributes: ['username', 'id'], 
+        include: {
+            model: UserData,
+            attributes: ['firstName', 'lastName', 'image'],
+            required: true
+        },
+    })
+    if(user) return user
+    return false;
 }
 
 module.exports = chatHandlers
