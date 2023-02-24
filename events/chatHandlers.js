@@ -11,7 +11,7 @@ const chatHandlers = async (socket, myUserId) => {
     *         triggers when a user sent a message. Message is then emitted to chatroom members sockets excluding current socket of sender
     */
    socket.on("send-message", async (data) => {
-    const { users, ChatRoomId, message } = data;
+    const { users, ChatRoomId, messageData } = data;
     const socketsList = await findUserSockets( users, myUserId, socket.id)
 
     //emit message to chatmember sockets(other user's sockets included)
@@ -21,7 +21,7 @@ const chatHandlers = async (socket, myUserId) => {
             const User = await getUserData(myUserId)
             if(User) sender = {...sender, User}
         }
-        socketsList.forEach(item => socket.to(item.socket).emit("receive-message", { sender, ChatRoomId, message }))
+        socketsList.forEach(item => socket.to(item.socket).emit("receive-message", { sender, ChatRoomId, messageData }))
     }
    })
 
