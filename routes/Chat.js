@@ -181,5 +181,24 @@ router.post("/send-message", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
+/*  @desc       set isLastMessageRead to true
+ *  @route      GET /api/chat/read-last-message/:id
+ *  @access     Private
+ */
+router.get("/read-last-message/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const ChatRoomId = req.params.id
+    const UserId = req.user.id;
+    const chatMember = await ChatMembers.findOne({where: {ChatRoomId, UserId}})
+    if(chatMember){
+        await chatMember.update({isLastMessageRead: true})
+        await chatMember.save()
+        res.json({isLastMessageRead: true, UserId, ChatRoomId})
+    } else {
+        res.status(401)
+        throw new Error("Not authorized.")
+    }
+}))
+
+
 module.exports = router;
 
