@@ -37,7 +37,6 @@ const index = async (io, socket) => {
         const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
         onlineFriends.forEach(item => socket.to(item.socket).emit("status-changed-friend", {status: data, UserId}))   //emit logout to online friends
       });
-
       
 
       /* @desc  disconnect/logout user
@@ -58,6 +57,7 @@ const index = async (io, socket) => {
 
       //require chat handlers
       await require("./chatHandlers")(socket, UserId)
+      await require("./friendHandlers")(socket, UserId)
     }
   }
 }
