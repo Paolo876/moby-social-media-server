@@ -36,6 +36,7 @@ app.use("/api/comments", require("./routes/Comments"));
 app.use("/api/chat", require("./routes/Chat"));
 app.use("/api/imagekit", require("./routes/Imagekit"));
 app.use("/api/friends", require("./routes/Friends"));
+app.use("/api/notifications", require("./routes/Notifications"));
 
 
 //custom errorhandling (middleware)
