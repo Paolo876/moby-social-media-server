@@ -13,7 +13,7 @@ const chatHandlers = async (socket, myUserId) => {
    socket.on("send-message", async (data) => {
     const { users, ChatRoomId, messageData, isNew=false } = data;
     const socketsList = await findUserSockets( users, myUserId, socket.id)
-    console.log(data)
+
     //emit message to chatmember sockets(other user's sockets included)
     if(socketsList.length !== 0 ) {
         let sender = { UserId: myUserId }

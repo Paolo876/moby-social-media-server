@@ -2,6 +2,7 @@ const Users = require("../Users");
 const UserData = require("../UserData");
 const UserStatus = require("../UserStatus");
 const UserSockets = require("../UserSockets");
+const UserNotifications = require("../UserNotifications");
 const UserBio = require("../UserBio");
 const Comments = require("../Comments");
 const Posts = require("../Posts");
@@ -20,6 +21,10 @@ module.exports = () => {
     // user - userstatus
     Users.hasMany(UserSockets, { foreignKey: "UserId", onDelete: "CASCADE"});
     UserSockets.belongsTo(Users);
+
+    // user - UserNotifications
+    Users.hasMany(UserNotifications, { foreignKey: "UserId", onDelete: "CASCADE"});
+    UserNotifications.belongsTo(Users);
 
     //user - userdata
     Users.hasOne(UserData, { foreignKey: "UserId", onDelete: "CASCADE"});
