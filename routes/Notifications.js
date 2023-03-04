@@ -9,8 +9,8 @@ const asyncHandler = require("express-async-handler");
 
 
 
-/*  @desc       Get all posts --paginated to 15 posts per request, most recent first.
- *  @route      GET /api/posts/
+/*  @desc       Get all user notifications
+ *  @route      GET /api/notifications/
  *  @access     Private
  */
 router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
@@ -29,7 +29,6 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         }
     })
 
-
     if(notifications){
         res.json(notifications)
     } else {
@@ -37,4 +36,19 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         throw new Error("Failed to fetch notifications.")
     }
 }));
+
+
+/*  @desc       Get all user notifications
+ *  @route      GET /api/notifications/
+ *  @access     Private
+ */
+router.get("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
+
+    await UserNotifications.destroy({ where: { UserId }})
+
+    res.json({isCleared: true, id: UserId})
+}));
+
+
 module.exports = router;
