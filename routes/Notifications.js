@@ -32,11 +32,11 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
 
     const notifications = await UserNotifications.findAll({
         where: {UserId},
+        attributes: ['isRead', 'id'], 
         include: {
             model: Notifications,
             include: {
                 model: Users,
-                // as: "ReferenceUser",
                 attributes: ['username', 'id'], 
                 include: {
                     model: UserData,
