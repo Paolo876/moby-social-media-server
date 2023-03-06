@@ -14,6 +14,15 @@ const UserNotifications = sequelize.define('UserNotifications', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    isRead: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
+    content: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    }
 },
 {
     freezeTableName: true
