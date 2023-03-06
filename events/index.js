@@ -55,9 +55,10 @@ const index = async (io, socket) => {
       });
 
 
-      //require chat handlers
+      //handlers
       await require("./chatHandlers")(socket, UserId)
       await require("./friendHandlers")(socket, UserId)
+      await require("./postHandlers")(socket, UserId)
     }
   }
 }

@@ -1,4 +1,3 @@
-const checkOnlineFriends = require("../utils/checkOnlineFriends");
 const Users = require("../models/Users")
 const UserData = require("../models/UserData")
 const UserSockets = require("../models/UserSockets")
