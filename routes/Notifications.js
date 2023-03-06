@@ -55,13 +55,13 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
-/*  @desc       Delete all user notifications
+/*  @desc       Clear all user notifications
  *  @route      GET /api/notifications/
  *  @access     Private
  */
 router.delete("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
     const UserId = req.user.id;
-    await Notifications.destroy({ where: { UserId }})
+    await UserNotifications.destroy({ where: { UserId }})
 
     res.json({isCleared: true, UserId})
 }));
@@ -74,8 +74,8 @@ router.delete("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
  */
 router.delete("/delete/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const UserId = req.user.id;
-    const id = req.params.id
-    await Notifications.destroy({ where: { UserId, id }})
+    const NotificationId = req.params.id
+    await UserNotifications.destroy({ where: { UserId, NotificationId }})
 
     res.json({isDeleted: true, UserId, id})
 }));
