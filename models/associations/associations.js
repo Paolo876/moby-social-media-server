@@ -2,6 +2,7 @@ const Users = require("../Users");
 const UserData = require("../UserData");
 const UserStatus = require("../UserStatus");
 const UserSockets = require("../UserSockets");
+const Notifications = require("../Notifications");
 const UserNotifications = require("../UserNotifications");
 const UserBio = require("../UserBio");
 const Comments = require("../Comments");
@@ -22,10 +23,15 @@ module.exports = () => {
     Users.hasMany(UserSockets, { foreignKey: "UserId", onDelete: "CASCADE"});
     UserSockets.belongsTo(Users);
 
-    // user - UserNotifications
+    // user - notifications
+    Users.hasMany(Notifications, { foreignKey: "UserId", onDelete: "CASCADE"});
     Users.hasMany(UserNotifications, { foreignKey: "UserId", onDelete: "CASCADE"});
-    UserNotifications.belongsTo(Users);
-    UserNotifications.belongsTo(Users, { as: "ReferenceUser", foreignKey: "ReferenceUserId",onDelete: "CASCADE" }); 
+    Notifications.belongsTo(Users);
+    // Notifications.belongsTo(Users, { as: "ReferenceUser", foreignKey: "ReferenceUserId",onDelete: "CASCADE" }); 
+
+    // notifications - usernotifications
+    Notifications.hasMany(UserNotifications, { foreignKey: "NotificationId", onDelete: "CASCADE"});
+    UserNotifications.belongsTo(Notifications);
 
     //user - userdata
     Users.hasOne(UserData, { foreignKey: "UserId", onDelete: "CASCADE"});
