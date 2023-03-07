@@ -16,9 +16,8 @@ const postHandlers = async (socket, UserId) => {
     */
     socket.on('emit-comment', async (data) => {
         // AuthorId, PostId, spliced comment, User
-        const authorSockets = await findUserSockets(data.AuthorId)
+        const authorSockets = await findUserSockets([data.AuthorId])
         authorSockets.forEach(item => socket.to(item.socket).emit("receive-comment", data))
-
     });
 
 
@@ -26,7 +25,7 @@ const postHandlers = async (socket, UserId) => {
     */
     socket.on('emit-like', async (data) => {
         // AuthorId, PostId, User
-        const authorSockets = await findUserSockets(data.AuthorId)
+        const authorSockets = await findUserSockets([data.AuthorId])
         authorSockets.forEach(item => socket.to(item.socket).emit("receive-like", data))
 
     });
