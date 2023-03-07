@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Users = require("../models/Users");
 const UserData = require("../models/UserData")
-const UserNotifications = require("../models/UserNotifications")
+// const UserNotifications = require("../models/UserNotifications")
 const Notifications = require("../models/Notifications")
 
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
@@ -30,7 +30,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
     //     }
     // })
 
-    const notifications = await UserNotifications.findAll({
+    const notifications = await Notifications.findAll({
         where: {UserId},
         attributes: ['isRead', 'id'], 
         include: {
@@ -61,7 +61,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
  */
 router.delete("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
     const UserId = req.user.id;
-    await UserNotifications.destroy({ where: { UserId }})
+    await Notifications.destroy({ where: { UserId }})
 
     res.json({isCleared: true, UserId})
 }));
@@ -75,7 +75,7 @@ router.delete("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
 router.delete("/delete/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const UserId = req.user.id;
     const NotificationId = req.params.id
-    await UserNotifications.destroy({ where: { UserId, NotificationId }})
+    await Notifications.destroy({ where: { UserId, NotificationId }})
 
     res.json({isDeleted: true, UserId, id})
 }));
