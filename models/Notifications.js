@@ -2,10 +2,6 @@ const { DataTypes } = require('sequelize');
 const sequelize = require("../config/database");
 
 const Notifications = sequelize.define('Notifications', {
-    title: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     type: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -14,11 +10,11 @@ const Notifications = sequelize.define('Notifications', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    // isRead: {
-    //     type: DataTypes.BOOLEAN,
-    //     allowNull: false,
-    //     defaultValue: false,
-    // },
+    isRead: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
     content: {
         type: DataTypes.STRING,
         allowNull: true,

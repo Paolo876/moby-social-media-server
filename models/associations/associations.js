@@ -25,13 +25,8 @@ module.exports = () => {
 
     // user - notifications
     Users.hasMany(Notifications, { foreignKey: "UserId", onDelete: "CASCADE"});
-    // Users.hasMany(UserNotifications, { foreignKey: "UserId", onDelete: "CASCADE"});
     Notifications.belongsTo(Users);
     Notifications.belongsTo(Users, { as: "ReferenceUser", foreignKey: "ReferenceUserId", onDelete: "CASCADE" }); 
-
-    // notifications - usernotifications
-    // Notifications.hasMany(UserNotifications, { foreignKey: "NotificationId", onDelete: "CASCADE"});
-    // UserNotifications.belongsTo(Notifications);
 
     //user - userdata
     Users.hasOne(UserData, { foreignKey: "UserId", onDelete: "CASCADE"});
