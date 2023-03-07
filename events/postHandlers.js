@@ -1,5 +1,6 @@
 const UserSockets = require("../models/UserSockets")
 const checkOnlineFriends = require("../utils/checkOnlineFriends");
+const findUserSockets = require("../utils/findUserSOckets");
 
 const postHandlers = async (socket, UserId) => {
 
@@ -13,17 +14,21 @@ const postHandlers = async (socket, UserId) => {
 
     /* @desc  emit commented post to author
     */
-    socket.on('emit-commented-post', async (data) => {
+    socket.on('emit-comment', async (data) => {
         // AuthorId, PostId, spliced comment, User
-        friendSockets.forEach(item => socket.to(item.socket).emit("receive-created-post", data))
+        const authorSockets = await findUserSockets(data.AuthorId)
+        authorSockets.forEach(item => socket.to(item.socket).emit("receive-comment", data))
+
     });
 
 
     /* @desc  emit liked post to author
     */
-    socket.on('emit-liked-post', async (data) => {
-        const friendSockets = await checkOnlineFriends(UserId)   // [{socket}]
-        friendSockets.forEach(item => socket.to(item.socket).emit("receive-created-post", data))
+    socket.on('emit-like', async (data) => {
+        // AuthorId, PostId, User
+        const authorSockets = await findUserSockets(data.AuthorId)
+        authorSockets.forEach(item => socket.to(item.socket).emit("receive-like", data))
+
     });
 }
 
