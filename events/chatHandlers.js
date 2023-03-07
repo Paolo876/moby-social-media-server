@@ -1,8 +1,5 @@
-const Users = require("../models/Users")
-const UserData = require("../models/UserData")
-const UserSockets = require("../models/UserSockets")
-const { Op } = require('sequelize');
-
+const findUserSockets = require("../utils/findUserSockets")
+const getUserData = require("../utils/getUserData")
 
 const chatHandlers = async (socket, myUserId) => {
 
@@ -24,31 +21,7 @@ const chatHandlers = async (socket, myUserId) => {
     }
    })
 
-
 }
 
-const findUserSockets = async( users, myUserId=null, excludeSocket=null) => {
-
-  if(myUserId) users.push(myUserId)
-  const result = await UserSockets.findAll({
-    where: { UserId: {[Op.in]: users}, socket: {[Op.not]: excludeSocket}},
-    raw: true
-  })
-
-  return result
-}
-
-const getUserData = async (id) => {
-    const user = await Users.findByPk(id, {
-        attributes: ['username', 'id'], 
-        include: {
-            model: UserData,
-            attributes: ['firstName', 'lastName', 'image'],
-            required: true
-        },
-    })
-    if(user) return user
-    return false;
-}
 
 module.exports = chatHandlers
