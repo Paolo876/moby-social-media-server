@@ -17,33 +17,18 @@ const asyncHandler = require("express-async-handler");
 router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
     const UserId = req.user.id;
 
-    // const notifications = await Notifications.findAll({
-    //     where: { UserId },
-    //     include: {
-    //         model: Users,
-    //         as: "ReferenceUser",
-    //         attributes: ['username', 'id'], 
-    //         include: [{
-    //             model: UserData,
-    //             attributes: ['firstName', 'lastName', 'image'],
-    //         }]
-    //     }
-    // })
-
     const notifications = await Notifications.findAll({
-        where: {UserId},
-        attributes: ['isRead', 'id'], 
+        where: { UserId },
         include: {
-            model: Notifications,
+            model: Users,
+            as: "ReferenceUser",
+            attributes: ['username', 'id'], 
             include: {
-                model: Users,
-                attributes: ['username', 'id'], 
-                include: {
-                    model: UserData,
-                    attributes: ['firstName', 'lastName', 'image'],
-                }
+                model: UserData,
+                attributes: ['firstName', 'lastName', 'image'],
             }
         }
+        
     })
 
     if(notifications){
