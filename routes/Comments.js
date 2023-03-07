@@ -16,7 +16,7 @@ const asyncHandler = require("express-async-handler");
 router.post("/new-comment", cookieJwtAuth, asyncHandler( async (req, res) => {
     const PostId = req.body.PostId;
     const UserId = req.user.id;
-    
+
     //check if post exists
     const post = await Posts.findByPk(PostId);
     if(post){
@@ -33,8 +33,18 @@ router.post("/new-comment", cookieJwtAuth, asyncHandler( async (req, res) => {
         })
         if(comment){
             //notify author
-            if(parseInt(UserId) !== parseInt(post.UserId)) await Notifications.create({type: "comment", link: `/posts/${PostId}`, ReferenceUserId: UserId, UserId: post.UserId})
-
+            if(parseInt(UserId) !== parseInt(post.UserId)) {
+                const data = {type: "comment", link: `/posts/${PostId}`, ReferenceUserId: UserId, UserId: post.UserId}
+                //if notification already exist, update isRead to false.
+                const existingNotif = await Notifications.findOne({ where: data })
+                if(existingNotif){
+                    existingNotif.changed('updatedAt', true)
+                    await existingNotif.update({ isRead: false, updatedAt: new Date() })
+                    await existingNotif.save({ silent: true});
+                } else {
+                    await Notifications.create(data)
+                }
+            }
             res.json(comment)
         } else {
             res.status(401)
