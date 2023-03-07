@@ -3,6 +3,8 @@ const router = express.Router();
 const Comments = require("../models/Comments");
 const Users = require("../models/Users");
 const UserData = require("../models/UserData");
+const Notifications = require("../models/Notifications");
+const Posts = require("../models/Posts");
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
 
@@ -12,22 +14,36 @@ const asyncHandler = require("express-async-handler");
  *  @access     Private
  */
 router.post("/new-comment", cookieJwtAuth, asyncHandler( async (req, res) => {
-    const { id } = await Comments.create({ ...req.body, UserId: req.user.id})
-    const comment = await Comments.findByPk(id,{
-        include: [{
-            model: Users, 
-            attributes: ['username', 'id'], 
+    const PostId = req.body.PostId;
+    const UserId = req.user.id;
+    
+    //check if post exists
+    const post = await Posts.findByPk(PostId);
+    if(post){
+        const { id } = await Comments.create({ ...req.body, UserId})
+        const comment = await Comments.findByPk(id,{
             include: [{
-                model: UserData,
-                attributes: ['firstName', 'lastName', 'image']
-            }]             
-        }]
-    })
-    if(comment){
-        res.json(comment)
+                model: Users, 
+                attributes: ['username', 'id'], 
+                include: [{
+                    model: UserData,
+                    attributes: ['firstName', 'lastName', 'image']
+                }]             
+            }]
+        })
+        if(comment){
+            //notify author
+            if(parseInt(UserId) !== parseInt(post.UserId)) await Notifications.create({type: "comment", link: `/posts/${PostId}`, ReferenceUserId: UserId, UserId: post.UserId})
+
+            res.json(comment)
+        } else {
+            res.status(401)
+            throw new Error("Failed to post comment.")
+        }    
     } else {
         res.status(401)
-        throw new Error("Failed to post comment.")
+        throw new Error("Post not found.")
+
     }
 }));
 
