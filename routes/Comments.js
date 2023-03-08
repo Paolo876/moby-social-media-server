@@ -22,6 +22,8 @@ router.post("/new-comment", cookieJwtAuth, asyncHandler( async (req, res) => {
     if(post){
         const { id } = await Comments.create({ ...req.body, UserId})
         const comment = await Comments.findByPk(id,{
+            raw: true,
+            nest: true,
             include: [{
                 model: Users, 
                 attributes: ['username', 'id'], 
@@ -29,23 +31,25 @@ router.post("/new-comment", cookieJwtAuth, asyncHandler( async (req, res) => {
                     model: UserData,
                     attributes: ['firstName', 'lastName', 'image']
                 }]             
-            }]
+            }],
         })
         if(comment){
             //notify author
             if(parseInt(UserId) !== parseInt(post.UserId)) {
                 const data = {type: "comment", link: `/posts/${PostId}`, ReferenceUserId: UserId, UserId: post.UserId}
                 //if notification already exist, update isRead to false.
-                const existingNotif = await Notifications.findOne({ where: data })
+                let existingNotif = await Notifications.findOne({ where: data })
                 if(existingNotif){
                     existingNotif.changed('updatedAt', true)
                     await existingNotif.update({ isRead: false, updatedAt: new Date() })
                     await existingNotif.save({ silent: true});
                 } else {
-                    await Notifications.create(data)
+                    existingNotif = await Notifications.create(data)
                 }
+                comment.notificationId = existingNotif.id;
             }
             res.json(comment)
+
         } else {
             res.status(401)
             throw new Error("Failed to post comment.")
