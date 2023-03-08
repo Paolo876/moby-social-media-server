@@ -1,4 +1,5 @@
 const UserSockets = require("../models/UserSockets")
+const Posts = require("../models/Posts")
 const checkOnlineFriends = require("../utils/checkOnlineFriends");
 const findUserSockets = require("../utils/findUserSOckets");
 
@@ -24,11 +25,20 @@ const postHandlers = async (socket, UserId) => {
     /* @desc  emit liked post to author
     */
     socket.on('emit-like', async (data) => {
-        // AuthorId, PostId, User
-        const authorSockets = await findUserSockets([data.AuthorId])
+        // PostId, User, IsLiked
+        const AuthorId = await findPostAuthor(data.PostId)
+        const authorSockets = await findUserSockets([AuthorId])
         authorSockets.forEach(item => socket.to(item.socket).emit("receive-like", data))
 
     });
+}
+
+const findPostAuthor = async (id) => {
+  const result = await Posts.findByPk(id, {
+    attributes: ["UserId"],
+    raw: true
+  })
+  return result.UserId;
 }
 
 module.exports = postHandlers
