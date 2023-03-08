@@ -1,7 +1,7 @@
 const UserSockets = require("../models/UserSockets")
-const Posts = require("../models/Posts")
 const checkOnlineFriends = require("../utils/checkOnlineFriends");
 const findUserSockets = require("../utils/findUserSOckets");
+const findPostAuthor = require("../utils/findPostAuthor");
 
 const postHandlers = async (socket, UserId) => {
 
@@ -33,12 +33,5 @@ const postHandlers = async (socket, UserId) => {
     });
 }
 
-const findPostAuthor = async (id) => {
-  const result = await Posts.findByPk(id, {
-    attributes: ["UserId"],
-    raw: true
-  })
-  return result.UserId;
-}
 
 module.exports = postHandlers

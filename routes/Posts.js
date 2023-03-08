@@ -7,7 +7,8 @@ const Bookmarks = require("../models/Bookmarks")
 const Likes = require("../models/Likes");
 const Comments = require("../models/Comments");
 const ImageKit = require("imagekit");
-
+const Notifications = require("../models/Notifications");
+const findPostAuthor = require("../utils/findPostAuthor")
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
 
@@ -223,7 +224,12 @@ router.get("/like/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
         res.json({isLiked: false, id: req.params.id, UserId: req.user.id})
     } else {
         await Likes.create({PostId: req.params.id, UserId: req.user.id})
-        res.json({isLiked: true, id: req.params.id, UserId: req.user.id})
+
+        //notify author
+        const AuthorId = await findPostAuthor(req.params.id)
+        await Notifications.create({})
+
+        res.json({isLiked: true, id: req.params.id, UserId: req.user.id, like})
     }
 }));
 
