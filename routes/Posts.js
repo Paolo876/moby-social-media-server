@@ -223,17 +223,17 @@ router.get("/like/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
 
     //notify author
     const AuthorId = await findPostAuthor(PostId)
-    const data = {type: "like", link: `/posts/${PostId}`, ReferenceUserId: UserId, UserId: AuthorId}
+    const data = {type: "like", link: `/posts/${PostId}`, ReferenceUserId: UserId, UserId: AuthorId, ReferenceId: PostId}
     let existingNotif = await Notifications.findOne({ where: data })  //check if notif already exist
 
     if(isLiked){
         await isLiked.destroy();
         if(existingNotif) await existingNotif.destroy();
-        res.json({isLiked: false, id: PostId, UserId, NotificationId: existingNotif.id})
+        res.json({isLiked: false, id: PostId, UserId, NotificationId: existingNotif ? existingNotif.id : null})
     } else {
         await Likes.create({PostId, UserId})
-        if(!existingNotif) existingNotif = await Notifications.create(data)
-        res.json({isLiked: true, id: PostId, UserId, NotificationId: existingNotif.id })
+        if(!existingNotif && parseInt(UserId) !== parseInt(AuthorId)) existingNotif = await Notifications.create(data)
+        res.json({isLiked: true, id: PostId, UserId, NotificationId: existingNotif ? existingNotif.id : null })
     }
 }));
 

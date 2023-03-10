@@ -36,7 +36,7 @@ router.post("/new-comment", cookieJwtAuth, asyncHandler( async (req, res) => {
         if(comment){
             //notify author
             if(parseInt(UserId) !== parseInt(post.UserId)) {
-                const data = {type: "comment", link: `/posts/${PostId}`, ReferenceUserId: UserId, UserId: post.UserId}
+                const data = {type: "comment", link: `/posts/${PostId}`, ReferenceUserId: UserId, UserId: post.UserId, ReferenceId: PostId}
                 //if notification already exist, update isRead to false.
                 let existingNotif = await Notifications.findOne({ where: data })
                 if(existingNotif){

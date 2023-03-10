@@ -17,7 +17,7 @@ const Notifications = sequelize.define('Notifications', {
     },
     ReferenceId: {      //id of post or message etc...
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
     }
 },
 {
