@@ -40,6 +40,19 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
+/*  @desc       mark notification as read
+ *  @route      GET /api/notifications/
+ *  @access     Private
+ */
+router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
+    // const ReferenceId = req.params.id;
+    // await Notifications.destroy({ where: { UserId }})
+
+    // res.json({isCleared: true, UserId})
+}));
+
+
 /*  @desc       Clear all user notifications
  *  @route      GET /api/notifications/
  *  @access     Private
@@ -50,7 +63,6 @@ router.delete("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
 
     res.json({isCleared: true, UserId})
 }));
-
 
 
 /*  @desc       Delete a notification by id
