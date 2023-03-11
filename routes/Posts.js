@@ -11,6 +11,7 @@ const Notifications = require("../models/Notifications");
 const findPostAuthor = require("../utils/findPostAuthor")
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
+const { Op } = require('sequelize');
 
 
 /*  @desc       Get all posts --paginated to 15 posts per request, most recent first.
@@ -94,9 +95,11 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     ]
     })
 
-    const isBookmarked = await Bookmarks.findOne({where: { PostId: req.params.id, UserId: req.user.id }})
-    
     if(post){
+        const isBookmarked = await Bookmarks.findOne({where: { PostId: req.params.id, UserId: req.user.id }})
+
+        //set notifications isRead property to true if any
+        await Notifications.update({isRead: true}, { where: { UserId: req.user.id, type: {[Op.in]: ["like", "comment", "post"]}, ReferenceId: req.params.id}, returning: true})
         res.json({post, isBookmarked: isBookmarked ? true : false})
     } else {
         res.status(401)
@@ -229,7 +232,7 @@ router.get("/like/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     if(isLiked){
         await isLiked.destroy();
         if(existingNotif) await existingNotif.destroy();
-        res.json({isLiked: false, id: PostId, UserId, NotificationId: existingNotif ? existingNotif.id : null})
+        res.json({isLiked: false, id: PostId, UserId, NotificationId: existingNotif ? existingNotif.id : null })
     } else {
         await Likes.create({PostId, UserId})
         if(!existingNotif && parseInt(UserId) !== parseInt(AuthorId)) existingNotif = await Notifications.create(data)
