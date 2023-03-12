@@ -19,6 +19,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
 
     const notifications = await Notifications.findAll({
         where: { UserId },
+        order: [[ 'updatedAt', 'DESC' ]], 
         include: {
             model: Users,
             as: "ReferenceUser",
