@@ -34,7 +34,7 @@ const index = async (io, socket) => {
       *         triggers when a user changes status
       */
       socket.on('status-change', async (data) => {
-        const onlineFriends = await checkOnlineFriends(UserId)    // {socket, UserId}
+        const onlineFriends = await checkOnlineFriends(UserId, true)    // {socket, UserId}
         onlineFriends.forEach(item => socket.to(item.socket).emit("status-changed-friend", {status: data, UserId}))   //emit logout to online friends
       });
       

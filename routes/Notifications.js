@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Users = require("../models/Users");
 const UserData = require("../models/UserData")
-// const UserNotifications = require("../models/UserNotifications")
 const Notifications = require("../models/Notifications")
 
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
