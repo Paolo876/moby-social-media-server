@@ -19,10 +19,10 @@ const { Op } = require('sequelize');
  *  @access     Private
  */
 router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
-    const pageSize = 15; // <--limit data fetched (pagination)
+    const pageSize = 10; // <--limit data fetched (pagination)
     const page = Number(req.query.pageNumber) || 1;
     const posts = await Posts.findAll({ 
-        offset: pageSize * ( page - 1), limit: 15,
+        offset: pageSize * ( page - 1), limit: 10,
         order: [ [ 'createdAt', 'DESC' ]], 
         include: [{
             model: Users, 
@@ -45,7 +45,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
         attributes: ["PostId"]
     })
     if(posts){
-        res.json({posts, bookmarks})
+        res.json({posts, bookmarks, pageNumber : page, hasMore: Boolean(posts.length === 10)})
     } else {
         res.status(401)
         throw new Error("Failed to fetch posts.")
