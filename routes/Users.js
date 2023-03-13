@@ -49,11 +49,13 @@ router.post("/login", asyncHandler( async (req, res) => {
  *  @access     Public
  */
 router.get("/profile/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const pageSize = 5; // <--limit data fetched (pagination)
+    const page = Number(req.query.pageNumber) || 1;
+
     const id = req.params.id
     const user = await Users.findOne({ 
         where: { id }, 
         attributes: ['username', 'id', 'createdAt'], 
-        order: [ [ Posts, 'createdAt', 'DESC' ]], 
         include: [
             {
                 model: UserData,
@@ -72,7 +74,9 @@ router.get("/profile/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
                     attributes: ['UserId', 'id'], 
                 }]
             },
-        ]
+        ],
+        order: [ [ Posts, 'createdAt', 'DESC' ]], 
+
     });
     if(user){
         res.json(user)

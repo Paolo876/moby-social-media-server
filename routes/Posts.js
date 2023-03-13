@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Posts = require("../models/Posts");
 const Users = require("../models/Users");
-const UserData = require("../models/UserData")
+const UserData = require("../models/UserData");
 const Bookmarks = require("../models/Bookmarks")
 const Likes = require("../models/Likes");
 const Comments = require("../models/Comments");
@@ -11,7 +11,8 @@ const Notifications = require("../models/Notifications");
 const findPostAuthor = require("../utils/findPostAuthor")
 const cookieJwtAuth = require("../middlewares/cookieJwtAuth");
 const asyncHandler = require("express-async-handler");
-const { Op } = require('sequelize');
+const { Op, } = require('sequelize');
+const { models: { friends } } = require('../config/database');
 
 
 /*  @desc       Get all posts --paginated to 15 posts per request, most recent first.
@@ -22,30 +23,34 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
     const pageSize = 10; // <--limit data fetched (pagination)
     const page = Number(req.query.pageNumber) || 1;
     const posts = await Posts.findAll({ 
-        offset: pageSize * ( page - 1), limit: 10,
-        order: [ [ 'createdAt', 'DESC' ]], 
-        include: [{
-            model: Users, 
-            attributes: ['username', 'id'], 
-            include: [{
-                model: UserData,
-                attributes: ['firstName', 'lastName', 'image'],
-            }]
-        }, {
-            model: Likes,
-            attributes: ['UserId'], 
-        }, {
-            model: Comments,
-            attributes: ['UserId', 'id'], 
+        offset: pageSize * ( page - 1), limit: pageSize,
+        attributes: {
+            exclude:["postText"]
         },
-    ]
+        order: [ [ 'createdAt', 'DESC' ]], 
+        include: [
+            {
+                model: Users, 
+                attributes: ['username', 'id'], 
+                include: [{
+                    model: UserData,
+                    attributes: ['firstName', 'lastName', 'image'],
+                }]
+            }, {
+                model: Likes,
+                attributes: ['UserId'], 
+            }, {
+                model: Comments,
+                attributes: ['UserId', 'id'], 
+            },
+        ],
     })
     const bookmarks = await Bookmarks.findAll({
         where: { UserId: req.user.id},
         attributes: ["PostId"]
     })
     if(posts){
-        res.json({posts, bookmarks, pageNumber : page, hasMore: Boolean(posts.length === 10)})
+        res.json({posts, bookmarks, pageNumber : page, hasMore: Boolean(posts.length === pageSize)})
     } else {
         res.status(401)
         throw new Error("Failed to fetch posts.")
@@ -58,6 +63,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
  *  @access     Private
  */
 router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
     const post = await Posts.findOne({ 
         where: { id: req.params.id },
         order: [ [ Comments, 'createdAt', 'DESC' ]], 
@@ -96,11 +102,20 @@ router.get("/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     })
 
     if(post){
-        const isBookmarked = await Bookmarks.findOne({where: { PostId: req.params.id, UserId: req.user.id }})
+        // if post is private, return post data if isFriends and if fetched by author
+        if(!post.isPublic) {
+            const isFriends = await friends.findOne({ where: { UserId, FriendId: post.UserId}})
+            if(!isFriends && post.UserId !== UserId){
+                res.json({User: post.User, isNotFriends: true})
+                return;
+            }
+        }
+        
+        const isBookmarked = await Bookmarks.findOne({where: { PostId: req.params.id, UserId }})
 
         //set notifications isRead property to true if any
-        await Notifications.update({isRead: true}, { where: { UserId: req.user.id, type: {[Op.in]: ["like", "comment", "post"]}, ReferenceId: req.params.id}, returning: true})
-        res.json({post, isBookmarked: isBookmarked ? true : false})
+        await Notifications.update({isRead: true}, { where: { UserId, type: {[Op.in]: ["like", "comment", "post"]}, ReferenceId: req.params.id}, returning: true})
+        res.json({post, isBookmarked: Boolean(isBookmarked)})
     } else {
         res.status(401)
         throw new Error("No data found.")
