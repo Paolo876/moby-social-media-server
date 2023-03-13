@@ -50,6 +50,12 @@ const { Server } = require("socket.io");
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cookie: true,
+  cors: {
+    credentials: true, 
+    origin:  process.env.CLIENT_ORIGINS.split(", "),
+    preflightContinue: true,
+    allowedHeaders: ['Content-Type', 'Authorization', "Cookie"],
+}
 });
 
 io.on("connection", async (socket) => require("./events/index")(io, socket))
@@ -60,6 +66,6 @@ app.set("socketio", io);
 
 const PORT = process.env.PORT || 3001;
 
-// httpServer.listen(PORT, () => console.log("LISTENING TO PORT", PORT));
+httpServer.listen(PORT, () => console.log("LISTENING TO PORT", PORT));
 
-app.listen(PORT, () => console.log("LISTENING TO PORT", PORT))
+// app.listen(PORT, () => console.log("LISTENING TO PORT", PORT))
