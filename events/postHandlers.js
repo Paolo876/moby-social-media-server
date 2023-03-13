@@ -1,6 +1,6 @@
 const UserSockets = require("../models/UserSockets")
 const checkOnlineFriends = require("../utils/checkOnlineFriends");
-const findUserSockets = require("../utils/findUserSOckets");
+const findUserSockets = require("../utils/findUserSockets");
 const findPostAuthor = require("../utils/findPostAuthor");
 
 const postHandlers = async (socket, UserId) => {
