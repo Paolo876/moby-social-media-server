@@ -60,6 +60,6 @@ app.set("socketio", io);
 
 const PORT = process.env.PORT || 3001;
 
-httpServer.listen(PORT, () => console.log("LISTENING TO PORT", PORT));
+// httpServer.listen(PORT, () => console.log("LISTENING TO PORT", PORT));
 
-// app.listen(PORT, () => console.log("LISTENING TO PORT", PORT))
+app.listen(PORT, () => console.log("LISTENING TO PORT", PORT))
