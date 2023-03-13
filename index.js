@@ -6,8 +6,7 @@ require("dotenv").config();
 //middlewares
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const cookieParser = require("cookie-parser");
-
-app.use(express.json());
+app.enable("trust proxy")
 app.use(cors(
     {
         credentials: true, 
@@ -16,6 +15,7 @@ app.use(cors(
         preflightContinue: true,
         allowedHeaders: ['Content-Type', 'Authorization', "Cookie"],
 }));//to allow api connection from computer to react project
+app.use(express.json());
 
 app.use(cookieParser());
 
