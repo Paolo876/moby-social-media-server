@@ -52,6 +52,17 @@ router.delete("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
+/*  @desc       Mark all notifications as read
+ *  @route      GET /api/notifications/
+ *  @access     Private
+ */
+router.get("/read-all", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
+    await Notifications.update({ isRead: true },{ where: { UserId }})
+    res.json({isAllRead: true, UserId})
+}));
+
+
 /*  @desc       Delete a notification by id
  *  @route      GET /api/notifications/
  *  @access     Private
