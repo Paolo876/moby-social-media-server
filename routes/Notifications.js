@@ -47,7 +47,7 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
 router.get("/read/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const UserId = req.user.id;
     const id = req.params.id
-    
+
     await Notifications.update({isRead: true}, { where: { id, UserId }})
 
     res.json({isRead: true, id, UserId})
@@ -83,8 +83,8 @@ router.get("/read-all", cookieJwtAuth, asyncHandler( async (req, res) => {
  */
 router.delete("/delete/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
     const UserId = req.user.id;
-    const NotificationId = req.params.id
-    await Notifications.destroy({ where: { UserId, NotificationId }})
+    const id = req.params.id
+    await Notifications.destroy({ where: { UserId, id }})
 
     res.json({isDeleted: true, UserId, id})
 }));
