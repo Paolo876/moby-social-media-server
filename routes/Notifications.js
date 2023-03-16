@@ -40,8 +40,22 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
 }));
 
 
+/*  @desc       set isRead property to true
+ *  @route      GET /api/notifications/:id
+ *  @access     Private
+ */
+router.get("/read/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
+    const UserId = req.user.id;
+    const id = req.params.id
+    
+    await Notifications.update({isRead: true}, { where: { id, UserId }})
+
+    res.json({isRead: true, id, UserId})
+}));
+
+
 /*  @desc       Clear all user notifications
- *  @route      GET /api/notifications/
+ *  @route      DELETE /api/notifications/clear-all
  *  @access     Private
  */
 router.delete("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
@@ -53,7 +67,7 @@ router.delete("/clear-all", cookieJwtAuth, asyncHandler( async (req, res) => {
 
 
 /*  @desc       Mark all notifications as read
- *  @route      GET /api/notifications/
+ *  @route      GET /api/notifications/read-all
  *  @access     Private
  */
 router.get("/read-all", cookieJwtAuth, asyncHandler( async (req, res) => {
@@ -64,7 +78,7 @@ router.get("/read-all", cookieJwtAuth, asyncHandler( async (req, res) => {
 
 
 /*  @desc       Delete a notification by id
- *  @route      GET /api/notifications/
+ *  @route      DELETE /api/notifications/delete/:id
  *  @access     Private
  */
 router.delete("/delete/:id", cookieJwtAuth, asyncHandler( async (req, res) => {
