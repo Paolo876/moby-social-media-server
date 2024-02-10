@@ -31,7 +31,6 @@ router.get("/", cookieJwtAuth, asyncHandler( async (req, res) => {
                 {
                     separate: true,
                     model: ChatMembers,
-                    // attributes: ["id"],
                     as: "ChatMembers",
                     where: { UserId: { [Op.not]: req.user.id } },
                     include: [{
