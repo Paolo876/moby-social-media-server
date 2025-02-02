@@ -35,7 +35,7 @@ router.post("/login", asyncHandler( async (req, res) => {
     if(user && (await bcrypt.compare(password, user.password))){
         const { id, username, UserDatum } = user;
         const token = generateToken(id)
-        res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true }) //send the user id on token
+        res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.dev", httpOnly: true }) //send the user id on token
         res.json({id, username, UserData: UserDatum, UserStatus: user.UserStatus})
     } else {
         res.status(401)
@@ -119,7 +119,7 @@ router.post("/signup", asyncHandler( async (req,res) => {
     if(user){  
         const { id, username } = user;
         const token = generateToken(id)
-        res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true }) //send the user id on token
+        res.cookie("token", token, { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.dev", httpOnly: true }) //send the user id on token
         res.status(201).json({id, username, UserData: null, UserStatus: { status: "online"}})
     } else {
         res.status(400)
@@ -150,7 +150,7 @@ router.post("/profile-setup", cookieJwtAuth, asyncHandler( async (req,res) => {
  *  @access     Public
  */
 router.get("/logout", asyncHandler( async (req,res) => {
-    res.cookie("token", 'none', { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.com", httpOnly: true , expires: new Date(Date.now() + 2 * 1000),})
+    res.cookie("token", 'none', { secure: true, sameSite: "none", path:"/", domain: process.env.NODE_ENV === "local" ? "localhost": ".paolobugarin.dev", httpOnly: true , expires: new Date(Date.now() + 2 * 1000),})
     res
         .status(201)
         .send({ message: 'User logged out successfully' })
